@@ -8,7 +8,8 @@ class ResumenDiario extends Model
 {
     protected $table = 'resumen_diario';
     protected $primaryKey = 'id_resumen';
-    public $timestamps = false;
+
+    public $timestamps = false; // ya no hay timestamps automáticos
 
     protected $fillable = [
         'id_usuario',

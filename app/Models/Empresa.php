@@ -8,7 +8,10 @@ class Empresa extends Model
 {
     protected $table = 'empresas';
     protected $primaryKey = 'id_empresa';
+
     public $timestamps = true;
+    const CREATED_AT = 'fecha_creacion';
+    const UPDATED_AT = 'fecha_actualizacion';
 
     protected $fillable = [
         'nombre',

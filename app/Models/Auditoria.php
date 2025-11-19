@@ -8,7 +8,10 @@ class Auditoria extends Model
 {
     protected $table = 'auditoria';
     protected $primaryKey = 'id_log';
+
     public $timestamps = true;
+    const CREATED_AT = 'fecha_creacion';
+    const UPDATED_AT = 'fecha_actualizacion';
 
     protected $fillable = [
         'id_usuario',
