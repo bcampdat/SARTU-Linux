@@ -2,6 +2,7 @@ import './bootstrap';
 
 import Alpine from 'alpinejs';
 
-window.Alpine = Alpine;
+// Recomendado
+globalThis.myVar = 123;
 
 Alpine.start();

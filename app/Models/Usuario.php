@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Hash;
 
 class Usuario extends Authenticatable
 {
@@ -17,7 +18,7 @@ class Usuario extends Authenticatable
         'id_rol',
         'nombre',
         'email',
-        'password', 
+        'password',
         'activo'
     ];
 
@@ -26,10 +27,17 @@ class Usuario extends Authenticatable
     ];
 
     // Mutator para encriptar password
-    public function setPasswordAttribute($value)
+    public function setPasswordHashAttribute($value)
+    {
+        $this->attributes['password_hash'] = Hash::make($value);
+    }
+
+/*     public function setPasswordAttribute($value)
     {
         $this->attributes['password_hash'] = bcrypt($value);
     }
+        esta es opcion nativa de php pero la otra permite cambiar mas limpiamente  el encriptador
+ */
 
     // Laravel Auth: devuelve la columna real
     public function getAuthPassword()

@@ -9,13 +9,13 @@ class ResumenDiario extends Model
     protected $table = 'resumen_diario';
     protected $primaryKey = 'id_resumen';
 
-    public $timestamps = false; // ya no hay timestamps automáticos
+    public $timestamps = false;
 
     protected $fillable = [
         'id_usuario',
         'fecha',
         'tiempo_trabajado',
-        'tiempo_pausas', 
+        'tiempo_pausas',
         'tiempo_total'
     ];
 

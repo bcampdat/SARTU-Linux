@@ -16,7 +16,7 @@ class Fichaje extends Model
         'id_usuario',
         'id_metodo',
         'tipo',
-        'timestamp', 
+        'timestamp',
         'lat',
         'lng',
         'notas'
