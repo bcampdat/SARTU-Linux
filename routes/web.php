@@ -1,20 +1,27 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\FichajeController;
+use App\Http\Controllers\AuditoriaController;
 
+// Dashboard (Breeze)
 Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+require_once __DIR__.'/auth.php';
+
+// Rutas para ADMIN SISTEMA
+Route::middleware(['auth', 'rol:admin_sistema'])->group(function () {
+    Route::resource('empresas', EmpresaController::class);
+    Route::resource('usuarios', UsuarioController::class);
+    Route::get('auditoria', [AuditoriaController::class, 'index'])->name('auditoria.index');
 });
 
+// Rutas para ENCARGADO
+Route::middleware(['auth', 'rol:encargado'])->group(function () {
+    Route::resource('fichajes', FichajeController::class)->only(['index']);
+});
 
