@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class EmpresaController extends Controller
 {
-    
+
     public function index()
     {
         return view('empresas.index', ['empresas' => Empresa::all()]);

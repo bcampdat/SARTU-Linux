@@ -12,8 +12,17 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Montserrat', 'Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                'sartu': {
+                    'rojo': '#C74D38',
+                    'rojo-oscuro': '#9B4E40', 
+                    'marron': '#704841',
+                    'gris-oscuro': '#463734',
+                    'negro': '#262222',
+                }
+            }
         },
     },
 

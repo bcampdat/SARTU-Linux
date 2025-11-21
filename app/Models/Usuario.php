@@ -3,44 +3,34 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Facades\Hash;
 
 class Usuario extends Authenticatable
 {
-    protected $table = 'usuarios';
-    protected $primaryKey = 'id_usuario';
+    protected $table = 'users';
+    protected $primaryKey = 'id';
     public $incrementing = true;
     protected $keyType = 'int';
     public $timestamps = true;
-    const CREATED_AT = 'fecha_creacion';
+    const CREATED_AT = 'fecha_registro';
     const UPDATED_AT = 'fecha_actualizacion';
 
     protected $fillable = [
         'id_empresa',
         'id_rol',
-        'nombre',
+        'name',
         'email',
-        'password_hash',
+        'password',
         'activo'
     ];
 
     protected $hidden = [
-        'password_hash',
+        'password',
     ];
 
-    // Mutator para encriptar password
-    public function setPasswordHashAttribute($value)
-    {
-        $this->attributes['password_hash'] = Hash::make($value);
-    }
+    // ELIMINADO: Los mutators ya no son necesarios
+    // Laravel maneja automáticamente 'password'
 
-    // Laravel Auth: devuelve la columna real
-    public function getAuthPassword()
-    {
-        return $this->password_hash;
-    }
-
-    // Relaciones
+    // Relaciones (MANTIENE igual)
     public function empresa()
     {
         return $this->belongsTo(Empresa::class, 'id_empresa', 'id_empresa');
@@ -53,6 +43,6 @@ class Usuario extends Authenticatable
 
     public function fichajes()
     {
-        return $this->hasMany(Fichaje::class, 'id_usuario', 'id_usuario');
+        return $this->hasMany(Fichaje::class, 'id_usuario', 'id');
     }
 }

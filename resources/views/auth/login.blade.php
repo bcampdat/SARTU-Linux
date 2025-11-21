@@ -1,47 +1,78 @@
+<!-- resources/views/auth/login.blade.php -->
 <x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <!-- Header del Card -->
+    <div class="text-center mb-8">
+        <h2 class="text-2xl font-bold text-sartu-negro">Iniciar Sesión</h2>
+        <p class="mt-2 text-sartu-gris-oscuro">Accede a tu cuenta SARTU</p>
+    </div>
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+        <!-- Email -->
+        <div class="mb-6">
+            <label for="email" class="block text-sm font-medium text-sartu-negro mb-2">
+                Correo Electrónico
+            </label>
+            <input 
+                id="email" 
+                name="email" 
+                type="email" 
+                required 
+                autofocus 
+                autocomplete="email"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sartu-rojo focus:border-transparent transition duration-200"
+                placeholder="usuario@empresa.com"
+            >
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
+        <div class="mb-6">
+            <label for="password" class="block text-sm font-medium text-sartu-negro mb-2">
+                Contraseña
+            </label>
+            <input 
+                id="password" 
+                name="password" 
+                type="password" 
+                required 
+                autocomplete="current-password"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sartu-rojo focus:border-transparent transition duration-200"
+                placeholder="••••••••"
+            >
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
+        <!-- Remember Me & Forgot Password -->
+        <div class="flex items-center justify-between mb-6">
+            <label for="remember_me" class="flex items-center">
+                <input id="remember_me" type="checkbox" name="remember" 
+                    class="rounded border-gray-300 text-sartu-rojo focus:ring-sartu-rojo">
+                <span class="ms-2 text-sm text-sartu-gris-oscuro">Recordar sesión</span>
             </label>
-        </div>
 
-        <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
+                <a href="{{ route('password.request') }}" class="text-sm text-sartu-rojo hover:text-sartu-rojo-oscuro">
+                    ¿Olvidaste tu contraseña?
                 </a>
             @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
         </div>
+
+        <!-- Login Button -->
+        <button type="submit" 
+                class="w-full bg-sartu-rojo text-white py-3 px-4 rounded-lg hover:bg-sartu-rojo-oscuro focus:ring-4 focus:ring-sartu-rojo/20 transition duration-200 font-semibold">
+            Iniciar Sesión
+        </button>
     </form>
+
+    <!-- Register Link -->
+    <div class="mt-6 text-center">
+        <p class="text-sm text-sartu-gris-oscuro">
+            ¿No tienes cuenta?
+            <a href="{{ route('register') }}" class="font-semibold text-sartu-rojo hover:text-sartu-rojo-oscuro">
+                Regístrate aquí
+            </a>
+        </p>
+    </div>
 </x-guest-layout>
