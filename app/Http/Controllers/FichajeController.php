@@ -21,7 +21,7 @@ class FichajeController extends Controller
                     $q->where('id_empresa', $usuario->id_empresa);
                 })->get();
         } else {
-            // Admin_sistema → puede ver todo
+            //    Admin_sistema → puede ver todo
             // Empleado → solo los suyos
             $fichajes = $usuario->rol->nombre === 'admin_sistema'
                 ? Fichaje::all()

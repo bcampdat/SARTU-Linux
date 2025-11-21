@@ -22,6 +22,6 @@ class ResumenDiario extends Model
     // Relación con Usuario
     public function usuario()
     {
-        return $this->belongsTo(Usuario::class, 'id_usuario', 'id_usuario');
+        return $this->belongsTo(Usuario::class, 'id_usuario', 'id');
     }
 }

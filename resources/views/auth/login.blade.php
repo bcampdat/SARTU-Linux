@@ -14,12 +14,12 @@
             <label for="email" class="block text-sm font-medium text-sartu-negro mb-2">
                 Correo Electrónico
             </label>
-            <input 
-                id="email" 
-                name="email" 
-                type="email" 
-                required 
-                autofocus 
+            <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                autofocus
                 autocomplete="email"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sartu-rojo focus:border-transparent transition duration-200"
                 placeholder="usuario@empresa.com"
@@ -32,11 +32,11 @@
             <label for="password" class="block text-sm font-medium text-sartu-negro mb-2">
                 Contraseña
             </label>
-            <input 
-                id="password" 
-                name="password" 
-                type="password" 
-                required 
+            <input
+                id="password"
+                name="password"
+                type="password"
+                required
                 autocomplete="current-password"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sartu-rojo focus:border-transparent transition duration-200"
                 placeholder="••••••••"
@@ -47,7 +47,7 @@
         <!-- Remember Me & Forgot Password -->
         <div class="flex items-center justify-between mb-6">
             <label for="remember_me" class="flex items-center">
-                <input id="remember_me" type="checkbox" name="remember" 
+                <input id="remember_me" type="checkbox" name="remember"
                     class="rounded border-gray-300 text-sartu-rojo focus:ring-sartu-rojo">
                 <span class="ms-2 text-sm text-sartu-gris-oscuro">Recordar sesión</span>
             </label>
@@ -60,7 +60,7 @@
         </div>
 
         <!-- Login Button -->
-        <button type="submit" 
+        <button type="submit"
                 class="w-full bg-sartu-rojo text-white py-3 px-4 rounded-lg hover:bg-sartu-rojo-oscuro focus:ring-4 focus:ring-sartu-rojo/20 transition duration-200 font-semibold">
             Iniciar Sesión
         </button>

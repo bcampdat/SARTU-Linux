@@ -13,6 +13,31 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Fichaje') }}
+                    </x-nav-link>
+                </div>
+                <!-- Navigation Links -->
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('ResumenDiario') }}
+                    </x-nav-link>
+                </div>
+                <!-- Navigation Links -->
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Empresa') }}
+                    </x-nav-link>
+                </div>
+            
+                <!-- Navigation Links -->
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Usuarios') }}
+                    </x-nav-link>
+                </div>
+                <!-- Navigation Links -->
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
@@ -42,9 +67,10 @@
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
 
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
+                            <x-dropdown-link
+                                :href="route('logout')"
+                                onclick="event.preventDefault(); this.closest('form').submit();"
+                                onkeydown="if(event.key==='Enter' || event.key===' ') { event.preventDefault(); this.closest('form').submit(); }">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
                         </form>
@@ -88,10 +114,11 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
 
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                    <x-responsive-nav-link
+                        :href="route('dashboard')"
+                        :active="request()->routeIs('dashboard')"
+                        onkeydown="if(event.key==='Enter' || event.key===' ') { event.preventDefault(); window.location.href=this.getAttribute('href'); }">
+                        {{ __('Dashboard') }}
                     </x-responsive-nav-link>
                 </form>
             </div>

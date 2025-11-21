@@ -91,3 +91,101 @@ CREATE TABLE IF NOT EXISTS auditoria (
     fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE SET NULL
 );
+
+
+ DESCRIBE empresas;
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type         | Null | Key | Default           | Extra                                         |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| id_empresa          | int          | NO   | PRI | NULL              | auto_increment                                |
+| nombre              | varchar(150) | NO   |     | NULL              |                                               |
+| limite_usuarios     | int          | NO   |     | 10                |                                               |
+| fecha_creacion      | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_actualizacion | datetime     | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+5 rows in set (0.01 sec)
+
+mysql> DESCRIBE fichajes;
++---------------------+-----------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type                                                | Null | Key | Default           | Extra                                         |
++---------------------+-----------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| id_fichaje          | bigint                                              | NO   | PRI | NULL              | auto_increment                                |
+| id_usuario          | int                                                 | NO   | MUL | NULL              |                                               |
+| id_metodo           | int                                                 | NO   | MUL | NULL              |                                               |
+| tipo                | enum('entrada','salida','pausa_inicio','pausa_fin') | NO   |     | NULL              |                                               |
+| timestamp           | datetime                                            | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| lat                 | decimal(10,7)                                       | YES  |     | NULL              |                                               |
+| lng                 | decimal(10,7)                                       | YES  |     | NULL              |                                               |
+| notas               | text                                                | YES  |     | NULL              |                                               |
+| fecha_creacion      | datetime                                            | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_actualizacion | datetime                                            | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------------+-----------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+10 rows in set (0.00 sec)
+
+mysql> DESCRIBE auditoria;
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type         | Null | Key | Default           | Extra                                         |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| id_log              | bigint       | NO   | PRI | NULL              | auto_increment                                |
+| id_usuario          | int          | YES  | MUL | NULL              |                                               |
+| accion              | varchar(200) | NO   |     | NULL              |                                               |
+| detalle             | text         | YES  |     | NULL              |                                               |
+| fecha               | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_creacion      | datetime     | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_actualizacion | datetime     | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+7 rows in set (0.00 sec)
+
+mysql> DESCRIBE metodos_fichaje;
++--------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| Field              | Type         | Null | Key | Default           | Extra                                         |
++--------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| id_metodo          | int          | NO   | PRI | NULL              | auto_increment                                |
+| nombre             | varchar(100) | NO   | UNI | NULL              |                                               |
+| descripcion        | text         | YES  |     | NULL              |                                               |
+| fecha_creacion     | datetime     | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_modificacion | datetime     | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++--------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+5 rows in set (0.00 sec)
+
+mysql> DESCRIBE resumen_diario;
++------------------+--------+------+-----+---------+----------------+
+| Field            | Type   | Null | Key | Default | Extra          |
++------------------+--------+------+-----+---------+----------------+
+| id_resumen       | bigint | NO   | PRI | NULL    | auto_increment |
+| id_usuario       | int    | NO   | MUL | NULL    |                |
+| fecha            | date   | NO   |     | NULL    |                |
+| tiempo_trabajado | int    | YES  |     | 0       |                |
+| tiempo_pausas    | int    | YES  |     | 0       |                |
++------------------+--------+------+-----+---------+----------------+
+5 rows in set (0.00 sec)
+
+mysql> DESCRIBE roles;
++---------------------+-------------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type        | Null | Key | Default           | Extra                                         |
++---------------------+-------------+------+-----+-------------------+-----------------------------------------------+
+| id_rol              | int         | NO   | PRI | NULL              | auto_increment                                |
+| nombre              | varchar(50) | NO   | UNI | NULL              |                                               |
+| fecha_creacion      | datetime    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_actualizacion | datetime    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------------+-------------+------+-----+-------------------+-----------------------------------------------+
+4 rows in set (0.01 sec)
+
+mysql> DESCRIBE users;
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type         | Null | Key | Default           | Extra                                         |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| id                  | int          | NO   | PRI | NULL              | auto_increment                                |
+| id_empresa          | int          | YES  | MUL | NULL              |                                               |
+| id_rol              | int          | NO   | MUL | NULL              |                                               |
+| name                | varchar(120) | YES  |     | NULL              |                                               |
+| email               | varchar(150) | NO   | UNI | NULL              |                                               |
+| password            | varchar(255) | YES  |     | NULL              |                                               |
+| activo              | tinyint(1)   | YES  |     | 1                 |                                               |
+| fecha_registro      | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| fecha_actualizacion | datetime     | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++---------------------+--------------+------+-----+-------------------+-----------------------------------------------+
+9 rows in set (0.01 sec)
+
+
+
