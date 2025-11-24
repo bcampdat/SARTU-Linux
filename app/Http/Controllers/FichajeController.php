@@ -3,50 +3,91 @@
 namespace App\Http\Controllers;
 
 use App\Models\Fichaje;
-use App\Models\MetodoFichaje;
+use App\Models\Usuario;
+use App\Models\ResumenDiario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class FichajeController extends Controller
 {
-
-    public function index()
+    /**
+     * EMPLEADO → botón de fichar + su propio resumen
+     */
+    public function create()
     {
-        $usuario = Auth::user();
+        $user = Auth::user();
+        $hoy = Carbon::now()->toDateString();
 
-        // Si es encargado → ve sus fichajes y los de empleados de su empresa
-        if ($usuario->rol->nombre === 'encargado') {
-            $fichajes = Fichaje::where('id_usuario', $usuario->id_usuario)
-                ->orWhereHas('usuario', function ($q) use ($usuario) {
-                    $q->where('id_empresa', $usuario->id_empresa);
-                })->get();
-        } else {
-            //    Admin_sistema → puede ver todo
-            // Empleado → solo los suyos
-            $fichajes = $usuario->rol->nombre === 'admin_sistema'
-                ? Fichaje::all()
-                : Fichaje::where('id_usuario', $usuario->id_usuario)->get();
-        }
+        $resumen = ResumenDiario::where('user_id', $user->id)
+            ->whereDate('fecha', $hoy)
+            ->first();
 
-        return view('fichajes.index', compact('fichajes'));
+        $ultimo = Fichaje::where('user_id', $user->id)
+            ->orderBy('fecha_hora', 'desc')
+            ->first();
+
+        return view('fichajes.fichar', [
+            'usuario' => $user,
+            'ultimo'  => $ultimo,
+            'resumen' => $resumen
+        ]);
     }
 
-    public function registrar(Request $request)
+    public function store(Request $request)
     {
+        $user = Auth::user();
+
         $request->validate([
-            'id_metodo' => 'required|exists:metodos_fichaje,id_metodo',
-            'tipo' => 'required|in:entrada,salida,pausa_inicio,pausa_fin',
+            'tipo' => 'required|in:entrada,salida,pausa,reanudar'
         ]);
 
         Fichaje::create([
-            'id_usuario' => Auth::user()->id_usuario,
-            'id_metodo' => $request->id_metodo,
-            'tipo' => $request->tipo,
-            'lat' => $request->lat,
-            'lng' => $request->lng,
-            'notas' => $request->notas,
+            'user_id'   => $user->id,
+            'metodo_id' => 1, // web_app por defecto
+            'tipo'      => $request->tipo,
+            'fecha_hora' => now(),
         ]);
 
-        return back()->with('success', 'Fichaje registrado correctamente');
+        // Recalcula resumen del día
+        \App\Services\Resumen\ResumenService::recalcular(
+            $user->id,
+            now()->toDateString()
+        );
+
+        return back()->with('success', 'Movimiento registrado.');
+    }
+    /**
+     * ENCARGADO / ADMIN → resumen general
+     */
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+
+        $fecha = $request->input('fecha', Carbon::now()->toDateString());
+
+        // ADMIN → ve todas las empresas
+        if ($user->rol->nombre === 'admin_sistema') {
+            $empleados = Usuario::with('empresa', 'rol')->get();
+        }
+
+        // ENCARGADO → solo empleados de su empresa
+        else {
+            $empleados = Usuario::where('empresa_id', $user->empresa_id)
+                ->with('empresa', 'rol')
+                ->get();
+        }
+
+        // Resumenes ya calculados
+        $resumenes = ResumenDiario::whereDate('fecha', $fecha)
+            ->whereIn('user_id', $empleados->pluck('id'))
+            ->get()
+            ->keyBy('user_id');
+
+        return view('Fichajes.res_gnral', [
+            'empleados'  => $empleados,
+            'resumenes'  => $resumenes,
+            'fecha'      => $fecha
+        ]);
     }
 }

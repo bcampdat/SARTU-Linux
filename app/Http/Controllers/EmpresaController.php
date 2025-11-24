@@ -7,78 +7,62 @@ use Illuminate\Http\Request;
 
 class EmpresaController extends Controller
 {
-    /**
-     * Mostrar listado de empresas
-     */
     public function index()
     {
-        $empresas = Empresa::all();
-        return view('empresas.list', compact('empresas'));
+        $empresas = Empresa::orderBy('nombre')->get();
+        return view('empresas.index', compact('empresas'));
     }
-
-    /**
-     * Mostrar formulario para crear una nueva empresa
-     */
     public function create()
     {
-        $empresa = new Empresa(); // objeto vacío para el form
-        $action = route('empresas.store');
-        $method = 'POST';
-        return view('empresas.form', compact('empresa', 'action', 'method'));
+        return view('empresas.create');
     }
-
-    /**
-     * Guardar nueva empresa
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'nombre' => 'required',
+            'nombre' => 'required|string|max:255',
             'limite_usuarios' => 'required|integer|min:1'
         ]);
 
-        Empresa::create($request->all());
-        return redirect()->route('empresas.index')->with('success', 'Empresa creada');
+        Empresa::create([
+            'nombre' => strip_tags($request->nombre),
+            'limite_usuarios' => $request->limite_usuarios,
+        ]);
+
+        return redirect()
+            ->route('empresas.index')
+            ->with('success', 'Empresa creada correctamente.');
     }
 
-    /**
-     * Mostrar detalle de empresa
-     */
-    public function show(Empresa $empresa)
-    {
-        return view('empresas.list', compact('empresa')); // puedes usar la misma vista list para detalle
-    }
-
-    /**
-     * Mostrar formulario para editar empresa
-     */
     public function edit(Empresa $empresa)
     {
-        $action = route('empresas.update', $empresa->id_empresa);
-        $method = 'PUT';
-        return view('empresas.form', compact('empresa', 'action', 'method'));
+        return view('empresas.edit', compact('empresa'));
     }
-
-    /**
-     * Actualizar empresa
-     */
     public function update(Request $request, Empresa $empresa)
     {
         $request->validate([
-            'nombre' => 'required',
+            'nombre' => 'required|string|max:255',
             'limite_usuarios' => 'required|integer|min:1'
         ]);
 
-        $empresa->update($request->all());
-        return redirect()->route('empresas.index')->with('success', 'Empresa actualizada');
-    }
+        $empresa->update([
+            'nombre' => strip_tags($request->nombre),
+            'limite_usuarios' => $request->limite_usuarios,
+        ]);
 
-    /**
-     * Eliminar empresa
-     */
+        return redirect()
+            ->route('empresas.index')
+            ->with('success', 'Empresa actualizada correctamente.');
+    }
     public function destroy(Empresa $empresa)
     {
+        if ($empresa->usuarios()->count() > 0) {
+            return back()->with('error', 'No puedes eliminar una empresa con usuarios asociados.');
+        }
+
         $empresa->delete();
-        return redirect()->route('empresas.index')->with('success', 'Empresa eliminada');
+
+        return redirect()
+            ->route('empresas.index')
+            ->with('success', 'Empresa eliminada.');
     }
 }

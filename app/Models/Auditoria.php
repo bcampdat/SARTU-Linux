@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Auditoria extends Model
 {
     protected $table = 'auditoria';
-    protected $primaryKey = 'id_log';
+    protected $primaryKey = 'id_auditoria';
 
     public $timestamps = true;
     const CREATED_AT = 'fecha_creacion';
@@ -18,10 +18,8 @@ class Auditoria extends Model
         'accion',
         'detalle'
     ];
-
-    // Relación con Usuario
     public function usuario()
     {
-        return $this->belongsTo(Usuario::class, 'id_usuario', 'id_usuario');
+        return $this->belongsTo(Usuario::class, 'user_id', 'id');
     }
 }

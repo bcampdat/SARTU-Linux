@@ -1,6 +1,4 @@
-<!-- resources/views/auth/login.blade.php -->
 <x-guest-layout>
-    <!-- Header del Card -->
     <div class="text-center mb-8">
         <h2 class="text-2xl font-bold text-sartu-negro">Iniciar Sesión</h2>
         <p class="mt-2 text-sartu-gris-oscuro">Accede a tu cuenta SARTU</p>
@@ -9,7 +7,6 @@
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
-        <!-- Email -->
         <div class="mb-6">
             <label for="email" class="block text-sm font-medium text-sartu-negro mb-2">
                 Correo Electrónico
@@ -27,7 +24,6 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Password -->
         <div class="mb-6">
             <label for="password" class="block text-sm font-medium text-sartu-negro mb-2">
                 Contraseña
@@ -44,7 +40,6 @@
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Remember Me & Forgot Password -->
         <div class="flex items-center justify-between mb-6">
             <label for="remember_me" class="flex items-center">
                 <input id="remember_me" type="checkbox" name="remember"
@@ -59,20 +54,10 @@
             @endif
         </div>
 
-        <!-- Login Button -->
         <button type="submit"
                 class="w-full bg-sartu-rojo text-white py-3 px-4 rounded-lg hover:bg-sartu-rojo-oscuro focus:ring-4 focus:ring-sartu-rojo/20 transition duration-200 font-semibold">
             Iniciar Sesión
         </button>
     </form>
-
-    <!-- Register Link -->
-    <div class="mt-6 text-center">
-        <p class="text-sm text-sartu-gris-oscuro">
-            ¿No tienes cuenta?
-            <a href="{{ route('register') }}" class="font-semibold text-sartu-rojo hover:text-sartu-rojo-oscuro">
-                Regístrate aquí
-            </a>
-        </p>
-    </div>
 </x-guest-layout>
+

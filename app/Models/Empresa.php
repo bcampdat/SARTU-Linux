@@ -15,12 +15,14 @@ class Empresa extends Model
 
     protected $fillable = [
         'nombre',
-        'limite_usuarios'
+        'limite_usuarios',
+        'jornada_diaria_minutos',
+        'max_pausa_no_contabilizada',
+        
     ];
 
-    // Relación con Usuarios
     public function usuarios()
     {
-        return $this->hasMany(Usuario::class, 'id_empresa', 'id_empresa');
+        return $this->hasMany(Usuario::class, 'empresa_id', 'id_empresa');
     }
 }

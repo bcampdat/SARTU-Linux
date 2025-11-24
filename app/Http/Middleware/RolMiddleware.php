@@ -22,4 +22,3 @@ class RolMiddleware
         return $next($request);
     }
 }
-

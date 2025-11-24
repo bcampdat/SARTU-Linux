@@ -16,10 +16,10 @@ export default {
             },
             colors: {
                 'sartu': {
-                    'rojo': '#C74D38',
-                    'rojo-oscuro': '#9B4E40', 
-                    'marron': '#704841',
-                    'gris-oscuro': '#463734',
+                    'rojo': '#4c2882',//malva
+                    'rojo-oscuro': '#3e2761', //malva oscuro
+                    'marron': '#828282', //gris perla
+                    'gris-oscuro': '#686868',
                     'negro': '#262222',
                 }
             }

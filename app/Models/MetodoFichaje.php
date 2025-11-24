@@ -18,9 +18,8 @@ class MetodoFichaje extends Model
         'descripcion'
     ];
 
-    // Relación con Fichajes
     public function fichajes()
     {
-        return $this->hasMany(Fichaje::class, 'id_metodo', 'id_metodo');
+        return $this->hasMany(Fichaje::class, 'metodo_id', 'id_metodo');
     }
 }

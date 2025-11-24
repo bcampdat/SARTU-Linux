@@ -7,19 +7,19 @@
         <form action="{{ route('usuarios.store') }}" method="POST" class="space-y-4">
             @csrf
             <div>
-                <label for ="nombre">Nombre</label>
+                <label>Nombre</label>
                 <input type="text" name="nombre" class="border rounded px-2 py-1 w-full" required>
             </div>
             <div>
-                <label for ="email">Email</label>
+                <label>Email</label>
                 <input type="email" name="email" class="border rounded px-2 py-1 w-full" required>
             </div>
             <div>
-                <label for="password">Contraseña</label>
+                <label>Contraseña</label>
                 <input type="password" name="password" class="border rounded px-2 py-1 w-full" required>
             </div>
             <div>
-                <label for="id_rol">Rol</label>
+                <label>Rol</label>
                 <select name="id_rol" class="border rounded px-2 py-1 w-full" required>
                     @foreach ($roles as $rol)
                         <option value="{{ $rol->id_rol }}">{{ $rol->nombre }}</option>

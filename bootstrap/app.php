@@ -13,8 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
     ->withMiddleware(function (Middleware $middleware): void {
 
+        // Middlewares globales
         $middleware->append(\Illuminate\Foundation\Http\Middleware\TrimStrings::class);
 
+        // Grupo web
         $middleware->group('web', [
             \Illuminate\Cookie\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
@@ -24,14 +26,16 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
 
+        // Grupo API
         $middleware->group('api', [
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
 
+        // ⭐ AQUI ESTÁ EL ARREGLO: alias correcto para tu middleware
         $middleware->alias([
             'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
-            'role' => \App\Http\Middleware\RolMiddleware::class
+            'rol'  => \App\Http\Middleware\RolMiddleware::class,
         ]);
     })
 
