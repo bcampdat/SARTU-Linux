@@ -6,8 +6,7 @@
         <h3 class="text-2xl font-semibold text-sartu-negro dark:text-white mb-6">
             Mi Jornada de Hoy
         </h3>
-
-
+        
         {{-- Barra de progreso --}}
         <div class="w-full bg-gray-300 rounded-full h-5 overflow-hidden mb-4">
             <div class="h-5 bg-sartu-rojo-oscuro transition-all duration-500"
@@ -43,7 +42,6 @@
     <div class="text-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-xl">
 
         <h3 class="text-xl font-semibold text-sartu-negro dark:text-white mb-6">Fichar</h3>
-
         <form method="POST" action="{{ route('fichajes.store') }}">
             @csrf
 

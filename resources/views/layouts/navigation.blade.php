@@ -3,9 +3,9 @@
         <div class="flex justify-between h-16">
 
             <!-- Left Side -->
+            <div class="flex items-center">
+                <!-- Logo -->
                 <div class="flex items-center">
-                    <!-- Logo -->
-                    <div class="flex items-center">
 
                     <!-- Logo SARTU que redirige al dashboard -->
                     <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
@@ -38,13 +38,27 @@
 
                     {{-- ENCARGADO --}}
                     @if(Auth::user()->rol_id === 2)
-                    <x-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
-                        {{ __('Usuarios') }}
-                    </x-nav-link>
 
-                    <x-nav-link :href="route('fichajes.index')" :active="request()->routeIs('fichajes.*')">
-                        {{ __('Fichajes') }}
-                    </x-nav-link>
+                    <x-responsive-nav-link :href="route('encargado.empleados')">
+                        {{ __('Empleados') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link :href="route('fichajes.index')">
+                        {{ __('Fichajes Empresa') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link :href="route('empleados.resumen')">
+                        {{ __('Resumen Empresa') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link :href="route('fichajes.create')">
+                        {{ __('Mi Fichaje') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link :href="route('fichaje.resumen')">
+                        {{ __('Mi Resumen') }}
+                    </x-responsive-nav-link>
+
                     @endif
 
                     {{-- EMPLEADO --}}
@@ -144,10 +158,10 @@
             {{-- ENCARGADO --}}
             @if(Auth::user()->rol_id === 2)
             <x-responsive-nav-link :href="route('usuarios.index')">
-                {{ __('Usuarios') }}
+                {{ __('Empleados') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('fichajes.index')">
-                {{ __('Fichajes') }}
+                {{ __('Fichajes de la Empresa') }}
             </x-responsive-nav-link>
             @endif
 

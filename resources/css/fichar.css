@@ -1,0 +1,60 @@
+/* ---- Botón redondo principal ---- */
+.fichaje-btn-round {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.25), 
+                inset 0 3px 6px rgba(255,255,255,0.15);
+}
+
+.fichaje-btn-round:hover {
+    transform: scale(1.06);
+    box-shadow: 0 16px 30px rgba(0,0,0,0.30);
+}
+
+.fichaje-btn-round:active {
+    transform: scale(0.96);
+    box-shadow: inset 0 5px 10px rgba(0,0,0,0.35);
+}
+
+/* ---- Botón rectangular ---- */
+.fichaje-btn-rect {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+}
+
+.fichaje-btn-rect:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+}
+
+.fichaje-btn-rect:active {
+    transform: translateY(1px);
+}
+
+/* ---- Al deshabilitarse (sin GPS) ---- */
+.fichaje-disabled {
+    opacity: 0.4;
+    filter: grayscale(40%);
+    cursor: not-allowed;
+}
+
+/* ---- Animación de “latido” para ENTRADA/SALIDA ---- */
+@keyframes pulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.04); }
+    100% { transform: scale(1); }
+}
+
+.fichaje-pulse {
+    animation: pulse 2s infinite ease-in-out;
+}
+
+/* ---- Contenedor de la alerta GPS ---- */
+.alert-gps {
+    background: rgba(255, 0, 0, 0.15);
+    border: 2px solid #ff6666;
+    padding: 12px;
+    border-radius: 8px;
+    color: #3f0d0d;
+    text-align: center;
+    font-weight: bold;
+}

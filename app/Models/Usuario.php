@@ -7,7 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 // sartu@sartu.com
 // Pass123.
 
-//efe@sartu.com
+//jefe@sartu.com
 // Sartu123. encargado
 
 //empleado1@sartu.com

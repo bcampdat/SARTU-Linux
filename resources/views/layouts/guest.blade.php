@@ -34,8 +34,8 @@
 
         <!-- Tarjeta de Login / Register -->
         <div class="w-full max-w-md
-            bg-[#1f1c1b]/80 backdrop-blur-xl
-            border border-[#463734]/40
+            bg-[#white]/80 backdrop-blur-xl
+            border border-[#828282]/40
             shadow-2xl rounded-2xl p-8">
             {{ $slot }}
         </div>

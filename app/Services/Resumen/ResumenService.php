@@ -10,67 +10,56 @@ class ResumenService
 {
     public static function recalcular(int $userId, string $fecha): void
     {
-        
-        /** @var \App\Models\Usuario $usuario */
         $usuario = Usuario::with('empresa')->findOrFail($userId);
         $empresa = $usuario->empresa;
 
-        $jornadaMinutos = $empresa->jornada_diaria_minutos ?? 480; // por defecto 8h
+        $jornadaMin     = $empresa->jornada_diaria_minutos ?? 480;
+        $maxPausaLibre  = $empresa->max_pausa_no_contabilizada ?? 0;
 
         $fichajes = Fichaje::where('user_id', $userId)
             ->whereDate('fecha_hora', $fecha)
             ->orderBy('fecha_hora')
             ->get();
 
-        $tiempoTrabajo = 0;
-        $tiempoPausas  = 0;
+        $trabajo = 0;
+        $pausas  = 0;
 
-        $ultimoTipo   = null;
-        $ultimoTiempo = null;
+        $prevTipo   = null;
+        $prevHora   = null;
 
         foreach ($fichajes as $f) {
 
-            if ($ultimoTipo === null) {
-                $ultimoTipo   = $f->tipo;
-                $ultimoTiempo = $f->fecha_hora;
-                continue;
+            if ($prevTipo !== null) {
+
+                $mins = $prevHora->diffInMinutes($f->fecha_hora);
+
+                if (
+                    in_array($prevTipo, ['entrada', 'reanudar']) &&
+                    in_array($f->tipo, ['pausa', 'salida'])
+                ) {
+                    $trabajo += $mins;
+                }
+
+                if (
+                    $prevTipo === 'pausa' &&
+                    in_array($f->tipo, ['reanudar', 'salida'])
+                ) {
+                    if ($mins > $maxPausaLibre) {
+                        $pausas += $mins;
+                    }
+                }
             }
 
-            //  TRAMOS DE TRABAJO
-            if (
-                in_array($ultimoTipo, ['entrada', 'reanudar']) &&
-                in_array($f->tipo, ['pausa', 'salida'])
-            ) {
-                $tiempoTrabajo += $ultimoTiempo->diffInMinutes($f->fecha_hora);
-            }
-
-            //  TRAMOS DE PAUSA
-            if (
-                $ultimoTipo === 'pausa' &&
-                in_array($f->tipo, ['reanudar', 'salida'])
-            ) {
-                $tiempoPausas += $ultimoTiempo->diffInMinutes($f->fecha_hora);
-            }
-
-            $ultimoTipo   = $f->tipo;
-            $ultimoTiempo = $f->fecha_hora;
-        }
-
-        // % de jornada completada
-        $porcentaje = 0;
-        if ($jornadaMinutos > 0) {
-            $porcentaje = min(100, round(($tiempoTrabajo / $jornadaMinutos) * 100));
+            $prevTipo = $f->tipo;
+            $prevHora = $f->fecha_hora;
         }
 
         ResumenDiario::updateOrCreate(
             ['user_id' => $userId, 'fecha' => $fecha],
             [
-                'tiempo_trabajado' => $tiempoTrabajo,
-                'tiempo_pausas'    => $tiempoPausas,
-                'tiempo_total'     => $tiempoTrabajo + $tiempoPausas,
-                
-                // 'jornada_minutos'  => $jornadaMinutos,
-                // 'progreso_jornada' => $porcentaje,
+                'tiempo_trabajado' => $trabajo,
+                'tiempo_pausas'    => $pausas,
+                'tiempo_total'     => $trabajo + $pausas,
             ]
         );
     }

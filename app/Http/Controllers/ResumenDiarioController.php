@@ -3,31 +3,56 @@
 namespace App\Http\Controllers;
 
 use App\Models\ResumenDiario;
+use App\Models\Fichaje;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ResumenDiarioController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
         if (!$user) {
-            abort(401, 'Usuario no autenticado');
+            abort(401);
         }
 
-        $esEncargado = $user->rol?->nombre === 'encargado';
+        $fecha = $request->input('fecha', now()->toDateString());
 
-        if ($esEncargado) {
-            $resumen = ResumenDiario::where('id_usuario', $user->id_usuario)
-                ->orWhereHas('usuario', function ($q) use ($user) {
-                    $q->where('id_empresa', $user->id_empresa);
+        // Si es ENCARGADO → ve todos los resúmenes de su empresa
+        if ($user->rol->nombre === 'encargado') {
+
+            $resumenes = ResumenDiario::whereDate('fecha', $fecha)
+                ->whereHas('usuario', function ($q) use ($user) {
+                    $q->where('empresa_id', $user->empresa_id);
                 })
+                ->with('usuario')
                 ->get();
-        } else {
-            $resumen = ResumenDiario::where('id_usuario', $user->id_usuario)->get();
+
+            // Empleados de la empresa
+            $empleados = $resumenes->pluck('usuario')->unique('id');
+
+            return view('resumen.res_gnral', [
+                'resumenes' => $resumenes->keyBy('user_id'),
+                'empleados' => $empleados,
+                'fecha' => $fecha
+            ]);
         }
 
-        return view('resumen.index', compact('resumen'));
+        // EMPLEADO NORMAL → solo su resumen
+        $resumen = ResumenDiario::where('user_id', $user->id)
+            ->whereDate('fecha', $fecha)
+            ->first();
+
+        $fichajes = Fichaje::where('user_id', $user->id)
+            ->whereDate('fecha_hora', $fecha)
+            ->orderBy('fecha_hora')
+            ->get();
+
+        return view('resumen.resumen', [
+            'resumen'  => $resumen,
+            'fichajes' => $fichajes,
+            'fecha'    => $fecha
+        ]);
     }
 }

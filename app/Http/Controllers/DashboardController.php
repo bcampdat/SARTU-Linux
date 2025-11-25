@@ -31,9 +31,9 @@ class DashboardController extends Controller
         }
     }
 
- 
+
     //  DASHBOARD ADMIN
-  
+
     private function dashboardAdmin(Request $request)
     {
         $hoy = now()->toDateString();
@@ -65,54 +65,79 @@ class DashboardController extends Controller
         ]);
     }
 
-   
+
     //  DASHBOARD ENCARGADO
-    
+
     private function dashboardEncargado(Request $request)
     {
         $user = Auth::user();
-        $hoy = now()->toDateString();
+        $hoy  = now()->toDateString();
 
-        $empleados = Usuario::where('empresa_id', $user->empresa_id);
+        $empleadosQuery = Usuario::where('empresa_id', $user->empresa_id);
 
-        $totalUsuariosActivos   = $empleados->where('activo', 1)->count();
-        $totalUsuariosInactivos = (clone $empleados)->where('activo', 0)->count();
+        $empleadosTotal         = $empleadosQuery->count();
+        $totalUsuariosActivos   = $empleadosQuery->clone()->where('activo', 1)->count();
+        $totalUsuariosInactivos = $empleadosQuery->clone()->where('activo', 0)->count();
 
-        $fichajesHoy = Fichaje::whereHas('usuario', function ($q) use ($user) {
+        $fichajesEmpresaQuery = Fichaje::whereHas('usuario', function ($q) use ($user) {
             $q->where('empresa_id', $user->empresa_id);
         });
 
-        $totalEntradasHoy = (clone $fichajesHoy)->where('tipo', 'entrada')->count();
-        $totalSalidasHoy  = (clone $fichajesHoy)->where('tipo', 'salida')->count();
+        $totalEntradasHoy = $fichajesEmpresaQuery->clone()->where('tipo', 'entrada')->count();
+        $totalSalidasHoy  = $fichajesEmpresaQuery->clone()->where('tipo', 'salida')->count();
 
-        $resumenHoy = ResumenDiario::whereHas('usuario', function ($q) use ($user) {
-            $q->where('empresa_id', $user->empresa_id);
-        })->whereDate('fecha', $hoy)->get();
+        $resumenEmpresaHoy = ResumenDiario::whereDate('fecha', $hoy)
+            ->whereHas('usuario', function ($q) use ($user) {
+                $q->where('empresa_id', $user->empresa_id);
+            })
+            ->get();
 
-        $ultimosFichajes = Fichaje::whereHas('usuario', function ($q) use ($user) {
-            $q->where('empresa_id', $user->empresa_id);
-        })->with('usuario')
-          ->latest()
-          ->take(8)
-          ->get();
+        $ultimosFichajesEmpresa = $fichajesEmpresaQuery
+            ->clone()
+            ->with('usuario')
+            ->latest()
+            ->take(8)
+            ->get();
+
+
+        $miResumen = ResumenDiario::where('user_id', $user->id)
+            ->whereDate('fecha', $hoy)
+            ->first();
+
+        $misFichajesHoy = Fichaje::where('user_id', $user->id)
+            ->whereDate('fecha_hora', $hoy)
+            ->get();
+
+        $misUltimosFichajes = Fichaje::where('user_id', $user->id)
+            ->latest()
+            ->take(5)
+            ->get();
 
         return view('dashboard', [
             'vista' => '_dashEncargado',
-            'data' => [
-                'empleadosTotal'         => $empleados->count(),
-                'totalUsuariosActivos'   => $totalUsuariosActivos,
+            'data'  => [
+                // EMPRESA
+                'empleadosTotal'     => $empleadosTotal,
+                'totalUsuariosActivos' => $totalUsuariosActivos,
                 'totalUsuariosInactivos' => $totalUsuariosInactivos,
-                'totalEntradasHoy'       => $totalEntradasHoy,
-                'totalSalidasHoy'        => $totalSalidasHoy,
-                'tiempoTrabajadoTotal'   => $resumenHoy->sum('tiempo_trabajado'),
-                'tiempoPausasTotal'      => $resumenHoy->sum('tiempo_pausas'),
-                'ultimosFichajes'        => $ultimosFichajes
+                'totalEntradasHoy'   => $totalEntradasHoy,
+                'totalSalidasHoy'    => $totalSalidasHoy,
+                'ultimosFichajesEmpresa' => $ultimosFichajesEmpresa,
+                'tiempoTrabajadoTotalEmpresa' => $resumenEmpresaHoy->sum('tiempo_trabajado'),
+                'tiempoPausasTotalEmpresa'    => $resumenEmpresaHoy->sum('tiempo_pausas'),
+
+                // PERSONALES DEL ENCARGADO
+                'miResumen'          => $miResumen,
+                'misUltimosFichajes' => $misUltimosFichajes,
+                'misFichajesHoy'     => $misFichajesHoy
             ]
         ]);
     }
 
+
+
     //  DASHBOARD EMPLEADO
-  
+
     private function dashboardEmpleado(Request $request)
     {
         $user = Auth::user();
@@ -125,7 +150,7 @@ class DashboardController extends Controller
         $resumen = ResumenDiario::where('user_id', $user->id)
             ->whereDate('fecha', $hoy)
             ->first();
-        
+
         $ultimosFichajes = Fichaje::where('user_id', $user->id)
             ->latest()
             ->take(6)
@@ -142,4 +167,3 @@ class DashboardController extends Controller
         ]);
     }
 }
-

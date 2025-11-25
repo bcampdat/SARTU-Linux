@@ -10,7 +10,7 @@
             <form action="{{ route('fichajes.registrar') }}" method="POST" class="space-y-3">
                 @csrf
                 <div>
-                    <label>Método de fichaje</label>
+                    <label for="id_metodo">Método de fichaje</label>
                     <select name="id_metodo" class="border rounded px-2 py-1 w-full" required>
                         @foreach(\App\Models\MetodoFichaje::all() as $metodo)
                             <option value="{{ $metodo->id_metodo }}">{{ $metodo->nombre }}</option>
@@ -18,7 +18,7 @@
                     </select>
                 </div>
                 <div>
-                    <label>Tipo</label>
+                    <label for="tipo">Tipo</label>
                     <select name="tipo" class="border rounded px-2 py-1 w-full" required>
                         <option value="entrada">Entrada</option>
                         <option value="salida">Salida</option>
@@ -27,7 +27,7 @@
                     </select>
                 </div>
                 <div>
-                    <label>Notas (opcional)</label>
+                    <label for="notas" >Notas (opcional)</label>
                     <input type="text" name="notas" class="border rounded px-2 py-1 w-full">
                 </div>
                 <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded">Registrar Fichaje</button>

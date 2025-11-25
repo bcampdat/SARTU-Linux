@@ -15,7 +15,7 @@ class UsuarioController extends Controller
     {
         $usuario = Auth::user();
 
-        // ADMIN
+        // ADMIN → todos
         if ($usuario->rol->nombre === 'admin_sistema') {
             $usuarios = Usuario::with(['empresa', 'rol'])->get();
         }
@@ -31,8 +31,8 @@ class UsuarioController extends Controller
                 ->where('id', $usuario->id)
                 ->get();
         }
-        
-        $usuarios = $usuarios->filter(function($u) {
+
+        $usuarios = $usuarios->filter(function ($u) {
             return $u->rol !== null;
         });
 
@@ -45,12 +45,10 @@ class UsuarioController extends Controller
         if ($usuario->rol->nombre === 'admin_sistema') {
             $empresas = Empresa::all();
             $roles = Rol::all();
-        }
-        elseif ($usuario->rol->nombre === 'encargado') {
+        } elseif ($usuario->rol->nombre === 'encargado') {
             $empresas = Empresa::where('id_empresa', $usuario->empresa_id)->get();
             $roles = Rol::where('nombre', 'empleado')->get();
-        }
-        else {
+        } else {
             abort(403);
         }
 
@@ -70,7 +68,8 @@ class UsuarioController extends Controller
         if ($usuario->rol->nombre === 'encargado') {
             $rolSolicitado = Rol::find($request->rol_id);
 
-            if ($rolSolicitado->nombre !== 'empleado' ||
+            if (
+                $rolSolicitado->nombre !== 'empleado' ||
                 $request->empresa_id != $usuario->empresa_id
             ) {
                 abort(403, 'No puedes crear ese tipo de usuario.');
@@ -146,5 +145,17 @@ class UsuarioController extends Controller
         $usuario->delete();
 
         return back()->with('success', 'Usuario eliminado.');
+    }
+
+    public function empleadosEmpresa()
+    {
+        $user = Auth::user();
+
+        // Encargado ve solo los empleados de su empresa
+        $empleados = Usuario::where('empresa_id', $user->empresa_id)
+            ->with('rol')
+            ->get();
+
+        return view('usuarios.encargado_index', compact('empleados'));
     }
 }

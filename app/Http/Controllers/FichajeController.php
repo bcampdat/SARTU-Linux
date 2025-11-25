@@ -27,10 +27,13 @@ class FichajeController extends Controller
             ->orderBy('fecha_hora', 'desc')
             ->first();
 
+        $ultimoTipo = $ultimo->tipo ?? null;
+
         return view('fichajes.fichar', [
             'usuario' => $user,
             'ultimo'  => $ultimo,
-            'resumen' => $resumen
+            'resumen' => $resumen,
+            'ultimoTipo'  => $ultimoTipo,
         ]);
     }
 
@@ -47,6 +50,8 @@ class FichajeController extends Controller
             'metodo_id' => 1, // web_app por defecto
             'tipo'      => $request->tipo,
             'fecha_hora' => now(),
+            'lat' => $request->lat,
+            'lng' => $request->lng,
         ]);
 
         // Recalcula resumen del día
@@ -84,7 +89,7 @@ class FichajeController extends Controller
             ->get()
             ->keyBy('user_id');
 
-        return view('Fichajes.res_gnral', [
+        return view('resumen.res_gnral', [
             'empleados'  => $empleados,
             'resumenes'  => $resumenes,
             'fecha'      => $fecha
