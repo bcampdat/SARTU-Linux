@@ -7,12 +7,9 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-             
-            {{-- Convertir las claves de $data en variables --}}
-            @php extract($data); @endphp
             
-            {{-- Incluir la vista correspondiente con las variables ya cargadas --}}
-            @include('dashboard.' . $vista)
+            {{-- Incluir la vista correspondiente --}}
+            @include('dashboard.' . $vista, $data)
 
         </div>
     </div>

@@ -4,86 +4,86 @@
 
             <!-- Left Side -->
             <div class="flex items-center">
+
                 <!-- Logo -->
                 <div class="flex items-center">
-
-                    <!-- Logo SARTU que redirige al dashboard -->
                     <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
-                        <!-- Icono circular con la S -->
                         <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-lg">
                             <span class="text-xl font-bold text-sartu-rojo">S</span>
                         </div>
-                        <!-- Texto SARTU -->
                         <span class="text-gray-800 dark:text-gray-200 font-bold text-xl">SARTU</span>
                     </a>
                 </div>
 
-                <!-- Desktop menu -->
+                <!-- Desktop Menu -->
                 <div class="hidden sm:flex sm:space-x-8 sm:ml-10">
 
                     {{-- ADMIN --}}
                     @if(Auth::user()->rol_id === 1)
                     <x-nav-link :href="route('empresas.index')" :active="request()->routeIs('empresas.*')">
-                        {{ __('Empresas') }}
+                        Empresas
                     </x-nav-link>
 
                     <x-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
-                        {{ __('Usuarios') }}
+                        Usuarios
                     </x-nav-link>
 
                     <x-nav-link :href="route('auditoria.index')" :active="request()->routeIs('auditoria.*')">
-                        {{ __('Auditoría') }}
+                        Auditoría
                     </x-nav-link>
                     @endif
 
-                    {{-- ENCARGADO --}}
-                    @if(Auth::user()->rol_id === 2)
 
-                    <x-responsive-nav-link :href="route('encargado.empleados')">
-                        {{ __('Empleados') }}
-                    </x-responsive-nav-link>
+                    {{-- ENCARGADO + ADMIN --}}
+                    @if(Auth::user()->rol_id === 2 || Auth::user()->rol_id === 1)
 
-                    <x-responsive-nav-link :href="route('fichajes.index')">
-                        {{ __('Fichajes Empresa') }}
-                    </x-responsive-nav-link>
+                    <x-nav-link :href="route('empresas.estado')" :active="request()->routeIs('empresas.estado')">
+                        Estado Empresa
+                    </x-nav-link>
 
-                    <x-responsive-nav-link :href="route('empleados.resumen')">
-                        {{ __('Resumen Empresa') }}
-                    </x-responsive-nav-link>
+                    <x-nav-link :href="route('empresas.resumen')" :active="request()->routeIs('empresas.resumen')">
+                        Resumen Empresa
+                    </x-nav-link>
 
-                    <x-responsive-nav-link :href="route('fichajes.create')">
-                        {{ __('Mi Fichaje') }}
-                    </x-responsive-nav-link>
+                    <x-nav-link :href="route('encargado.empleados')" :active="request()->routeIs('encargado.empleados')">
+                        Empleados
+                    </x-nav-link>
 
-                    <x-responsive-nav-link :href="route('fichaje.resumen')">
-                        {{ __('Mi Resumen') }}
-                    </x-responsive-nav-link>
-
-                    @endif
-
-                    {{-- EMPLEADO --}}
-                    @if(Auth::user()->rol_id === 3)
                     <x-nav-link :href="route('fichajes.create')" :active="request()->routeIs('fichajes.create')">
-                        {{ __('Fichar') }}
+                        Mi Fichaje
                     </x-nav-link>
 
                     <x-nav-link :href="route('fichaje.resumen')" :active="request()->routeIs('fichaje.resumen')">
-                        {{ __('Mi Resumen') }}
+                        Mi Resumen
                     </x-nav-link>
+
                     @endif
 
-                    {{-- Todos --}}
+
+                    {{-- EMPLEADO --}}
+                    @if(Auth::user()->rol_id === 3)
+
+                    <x-nav-link :href="route('fichajes.create')" :active="request()->routeIs('fichajes.create')">
+                        Fichar
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('fichaje.resumen')" :active="request()->routeIs('fichaje.resumen')">
+                        Mi Resumen
+                    </x-nav-link>
+
+                    @endif
+
+
+                    {{-- Dashboard para todos --}}
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                        Dashboard
                     </x-nav-link>
 
                 </div>
-
             </div>
 
             <!-- Right: Profile -->
             <div class="hidden sm:flex sm:items-center">
-
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
@@ -91,9 +91,9 @@
                             <svg class="ml-1 h-4 w-4" fill="currentColor">
                                 <path fill-rule="evenodd"
                                     d="M5.293 7.293a1 1 0 011.414 0L10
-                                       10.586l3.293-3.293a1 1 0 111.414
-                                       1.414l-4 4a1 1 0 01-1.414
-                                       0l-4-4a1 1 0 010-1.414z"
+                                         10.586l3.293-3.293a1 1 0 111.414
+                                         1.414l-4 4a1 1 0 01-1.414
+                                         0l-4-4a1 1 0 010-1.414z"
                                     clip-rule="evenodd" />
                             </svg>
                         </button>
@@ -101,23 +101,21 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Perfil') }}
+                            Perfil
                         </x-dropdown-link>
 
-                        <!-- Logout -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link href="{{ route('logout') }}"
                                 onclick="event.preventDefault(); this.closest('form').submit();">
-                                {{ __('Cerrar sesión') }}
+                                Cerrar sesión
                             </x-dropdown-link>
                         </form>
                     </x-slot>
                 </x-dropdown>
-
             </div>
 
-            <!-- Mobile hamburger -->
+            <!-- Mobile Hamburger -->
             <div class="sm:hidden flex items-center">
                 <button @click="open = !open"
                     class="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">
@@ -144,46 +142,84 @@
 
             {{-- ADMIN --}}
             @if(Auth::user()->rol_id === 1)
-            <x-responsive-nav-link :href="route('empresas.index')">
-                {{ __('Empresas') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('usuarios.index')">
-                {{ __('Usuarios') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('auditoria.index')">
-                {{ __('Auditoría') }}
-            </x-responsive-nav-link>
+                {{-- Submenu Empresas --}}
+                <div x-data="{ openEmpresas: false }" class="relative">
+                    <button @click="openEmpresas = !openEmpresas"
+                        class="w-full text-left px-4 py-2 hover:bg-gray-200 rounded flex justify-between items-center">
+                        Empresas
+                        <span x-show="!openEmpresas">▸</span>
+                        <span x-show="openEmpresas">▾</span>
+                    </button>
+
+                    <div x-show="openEmpresas" @click.away="openEmpresas = false" class="mt-1 ml-4 space-y-1">
+                        <x-responsive-nav-link :href="route('empresas.estado')">Estado Empresa</x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('empresas.resumen')">Resumen Empresa</x-responsive-nav-link>
+                    </div>
+                </div>
+                {{-- Submenu Usuarios --}}
+                <div x-data="{ openUsuarios: false }" class="relative mt-2">
+                    <button @click="openUsuarios = !openUsuarios"
+                        class="w-full text-left px-4 py-2 hover:bg-gray-200 rounded flex justify-between items-center">
+                        Usuarios
+                        <span x-show="!openUsuarios">▸</span>
+                        <span x-show="openUsuarios">▾</span>
+                    </button>
+
+                    <div x-show="openUsuarios" @click.away="openUsuarios = false" class="mt-1 ml-4 space-y-1">
+                        <x-responsive-nav-link :href="route('encargado.empleados')">Empleados</x-responsive-nav-link>
+                    </div>
+                </div>
+
+            {{-- Enlaces individuales --}}
+            
+            <x-responsive-nav-link :href="route('usuarios.index')">Usuarios</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('auditoria.index')">Auditoría</x-responsive-nav-link>
             @endif
 
             {{-- ENCARGADO --}}
-            @if(Auth::user()->rol_id === 2)
-            <x-responsive-nav-link :href="route('usuarios.index')">
-                {{ __('Empleados') }}
+            @if(Auth::user()->rol_id === 2 )
+
+            <x-responsive-nav-link :href="route('empresas.estado')">
+                Estado Empresa
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('fichajes.index')">
-                {{ __('Fichajes de la Empresa') }}
+
+            <x-responsive-nav-link :href="route('empresas.resumen')">
+                Resumen Empresa
             </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('encargado.empleados')">
+                Empleados
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('fichajes.create')">
+                Mi Fichaje
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('fichaje.resumen')">
+                Mi Resumen
+            </x-responsive-nav-link>
+
             @endif
 
             {{-- EMPLEADO --}}
             @if(Auth::user()->rol_id === 3)
             <x-responsive-nav-link :href="route('fichajes.create')">
-                {{ __('Fichar') }}
+                Fichar
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('fichaje.resumen')">
-                {{ __('Mi Resumen') }}
+                Mi Resumen
             </x-responsive-nav-link>
             @endif
 
-            {{-- Todos --}}
+            {{-- Dashboard para todos --}}
             <x-responsive-nav-link :href="route('dashboard')">
-                {{ __('Dashboard') }}
+                Dashboard
             </x-responsive-nav-link>
 
         </div>
 
-        <!-- Mobile: Profile + logout -->
+        <!-- Mobile Profile -->
         <div class="pt-4 pb-1 border-t border-gray-300">
             <div class="px-4">
                 <div class="font-medium text-base">{{ Auth::user()->name }}</div>
@@ -192,14 +228,14 @@
 
             <div class="mt-3">
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Perfil') }}
+                    Perfil
                 </x-responsive-nav-link>
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <x-responsive-nav-link href="{{ route('logout') }}"
                         onclick="event.preventDefault(); this.closest('form').submit();">
-                        {{ __('Cerrar sesión') }}
+                        Cerrar sesión
                     </x-responsive-nav-link>
                 </form>
             </div>

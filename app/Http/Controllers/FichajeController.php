@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Fichaje;
+use App\Models\Empresa;
 use App\Models\Usuario;
 use App\Models\ResumenDiario;
 use Illuminate\Http\Request;
@@ -95,4 +96,82 @@ class FichajeController extends Controller
             'fecha'      => $fecha
         ]);
     }
+    public function resumenEmpresa(Request $request)
+    {
+        $user = Auth::user();
+        $fecha = $request->get('fecha', now()->toDateString());
+
+        if ($user->rol->nombre === 'admin_sistema') {
+            $empresaId = $request->empresa_id;
+        } else {
+            $empresaId = $user->empresa_id;
+        }
+
+        $empleados = Usuario::where('empresa_id', $empresaId)->get();
+
+        $resumenes = ResumenDiario::whereDate('fecha', $fecha)
+            ->whereIn('user_id', $empleados->pluck('id'))
+            ->with('usuario')
+            ->get();
+
+        $totalTrabajado = $resumenes->sum('tiempo_trabajado');
+        $totalPausas    = $resumenes->sum('tiempo_pausas');
+
+        $jornada = Empresa::find($empresaId)->jornada_diaria_minutos;
+
+        $alertas = [];
+
+        foreach ($resumenes as $r) {
+            if ($r->tiempo_trabajado > $jornada) {
+                $alertas[] = $r->usuario->name . ' ha superado la jornada';
+            }
+        }
+
+        $empresas = [];
+        if ($user->rol->nombre === 'admin_sistema') {
+            $empresas = Empresa::all();
+        }
+
+        return view('empresas.resumen', compact(
+            'resumenes',
+            'totalTrabajado',
+            'totalPausas',
+            'alertas',
+            'empresaId',
+            'empresas',
+            'fecha'
+        ));
+    }
+    
+    public function estadoEmpresa(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user->rol->nombre === 'admin_sistema') {
+            $empresaId = $request->empresa_id;
+        } else {
+            $empresaId = $user->empresa_id;
+        }
+
+        $empleados = Usuario::where('empresa_id', $empresaId)->get();
+
+        foreach ($empleados as $emp) {
+            $ultimo = $emp->fichajes()->latest('fecha_hora')->first();
+            $emp->estado_actual = $ultimo->tipo ?? 'salida';
+            $emp->hora_estado  = $ultimo?->fecha_hora;
+        }
+
+        $empresas = [];
+
+        if ($user->rol->nombre === 'admin_sistema') {
+            $empresas = Empresa::all();
+        }
+
+        return view('empresas.estado', compact(
+            'empleados',
+            'empresaId',
+            'empresas'
+        ));
+    }
 }
+

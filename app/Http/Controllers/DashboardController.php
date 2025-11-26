@@ -31,7 +31,6 @@ class DashboardController extends Controller
         }
     }
 
-
     //  DASHBOARD ADMIN
 
     private function dashboardAdmin(Request $request)
@@ -64,7 +63,6 @@ class DashboardController extends Controller
             ]
         ]);
     }
-
 
     //  DASHBOARD ENCARGADO
 
@@ -134,8 +132,6 @@ class DashboardController extends Controller
         ]);
     }
 
-
-
     //  DASHBOARD EMPLEADO
 
     private function dashboardEmpleado(Request $request)
@@ -156,13 +152,17 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
+        $ultimoFichaje = $fichajesHoy->last();
+
         return view('dashboard', [
             'vista' => '_dashEmpleado',
             'data' => [
                 'resumen'          => $resumen,
                 'ultimosFichajes'  => $ultimosFichajes,
                 'fichajesHoy'      => $fichajesHoy,
-                'estado'           => $user->estado
+                'estado'           => $user->estado,
+                'ultimoFichaje'    => $ultimoFichaje
+
             ]
         ]);
     }

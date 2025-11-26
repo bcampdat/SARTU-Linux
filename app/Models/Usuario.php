@@ -49,8 +49,7 @@ class Usuario extends Authenticatable
     }
     public function rol()
     {
-        return $this->belongsTo(Rol::class, 'rol_id', 'id_rol')
-            ->select('id_rol', 'nombre');
+        return $this->belongsTo(Rol::class, 'rol_id', 'id_rol');
     }
     public function fichajes()
     {

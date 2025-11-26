@@ -16,6 +16,11 @@
                 class="mt-4 px-4 py-2 bg-sartu-rojo text-white rounded hover:bg-sartu-rojo-oscuro">
                 Actualizar Usuario
             </button>
+
+            <a href="{{ url()->previous() }}"
+                class="mt-4 px-4 py-2 bg-sartu-marron text-white rounded hover:bg-sartu-gris-oscuro">
+                Cancelar
+            </a>
         </form>
     </div>
 </x-app-layout>

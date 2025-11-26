@@ -25,7 +25,6 @@
         </div>
         @endif
 
-
         {{-- ESTADO ACTUAL --}}
         <p class="text-2xl font-semibold">
             Estado actual:

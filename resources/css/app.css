@@ -3,3 +3,5 @@
 @tailwind utilities;
 
 @import "./fichar.css";
+@import "./_miFichar.css";
+
