@@ -19,7 +19,7 @@
         </div>
         @endif
 
-        <a href="{{ route('empresas.create') }}"
+        <a href="{{ route('empresa.create') }}"
             class="px-4 py-2 bg-sartu-rojo text-white rounded shadow hover:bg-sartu-rojo-oscuro">
             ➕ Crear Empresa
         </a>
@@ -44,10 +44,10 @@
                         <td class="px-4 py-2 text-center">{{ $empresa->max_pausa_no_contabilizada }}</td>
 
                         <td class="px-4 py-2 text-center">
-                            <a href="{{ route('empresas.edit', $empresa->id_empresa) }}"
+                            <a href="{{ route('empresa.edit', $empresa->id_empresa) }}"
                                 class="text-blue-600 mr-3 hover:underline">Editar</a>
 
-                            <form action="{{ route('empresas.destroy', $empresa->id_empresa) }}"
+                            <form action="{{ route('empresa.destroy', $empresa->id_empresa) }}"
                                 method="POST"
                                 class="inline"
                                 onsubmit="return confirm('¿Eliminar empresa?')">

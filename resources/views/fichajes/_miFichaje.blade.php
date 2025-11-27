@@ -4,8 +4,8 @@ use Carbon\Carbon;
 $trabajado = $resumen->tiempo_trabajado ?? 0;
 $pausas    = $resumen->tiempo_pausas ?? 0;
 
-$jornada  = $empresa->jornada_diaria_minutos ?? 480;
-$pausaMax = $empresa->max_pausa_no_contabilizada ?? 0;
+$jornada   = $empresa->jornada_diaria_minutos ?? 480;
+$pausaMax  = $empresa->max_pausa_no_contabilizada ?? 0;
 
 $progreso = $jornada > 0
     ? min(100, round(($trabajado * 100) / $jornada))
@@ -13,10 +13,17 @@ $progreso = $jornada > 0
 
 $pausaRestante = max(0, $pausaMax - $pausas);
 
+// HORAS EXTRA (solo informativa)
+$extraMin = max(0, $trabajado - $jornada);
+
 // ⏱ TIEMPO REAL DESDE EL ÚLTIMO FICHAJE
 $segundosBase = 0;
 
-if (!empty($ultimoFichaje) && $ultimoFichaje->fecha_hora) {
+if (
+    !empty($ultimoFichaje) &&
+    in_array($ultimoTipo, ['entrada', 'reanudar']) &&
+    $ultimoFichaje->fecha_hora->isToday()
+) {
     $segundosBase = $ultimoFichaje->fecha_hora->diffInSeconds(now());
 }
 @endphp
@@ -27,7 +34,7 @@ if (!empty($ultimoFichaje) && $ultimoFichaje->fecha_hora) {
         Mi Jornada de Hoy
     </h2>
 
-    {{-- RELOJ EN TIEMPO REAL --}}
+    {{-- RELOJ EN TIEMPO REAL (TRABAJO) --}}
     <div
         id="relojTiempoReal"
         class="text-4xl font-mono font-bold text-sartu-rojo"
@@ -48,7 +55,7 @@ if (!empty($ultimoFichaje) && $ultimoFichaje->fecha_hora) {
         @endif
     </p>
 
-    {{-- BARRA PROGRESO (SIN STYLE DINÁMICO EN BLADE) --}}
+    {{-- BARRA PROGRESO --}}
     <div class="w-full bg-gray-300 rounded-full h-5 overflow-hidden">
         <div
             id="barraProgreso"
@@ -85,10 +92,17 @@ if (!empty($ultimoFichaje) && $ultimoFichaje->fecha_hora) {
         </div>
     </div>
 
-    {{-- ALERTA EXCESO --}}
+    {{-- ALERTA EXCESO PAUSA --}}
     @if($pausas > $pausaMax)
         <div class="bg-red-600 text-white p-3 rounded-lg mt-4">
             ⚠ Has superado el tiempo de pausa permitido
+        </div>
+    @endif
+
+    {{-- ALERTA HORAS EXTRA --}}
+    @if($extraMin > 0)
+        <div class="bg-orange-500 text-white p-3 rounded-lg mt-2">
+            ⚠ Estás en horas extra (+{{ $extraMin }} min sobre la jornada)
         </div>
     @endif
 
@@ -156,11 +170,11 @@ document.addEventListener('DOMContentLoaded', function () {
         barra.style.width = progreso + '%';
     }
 
-    // RELOJ TIEMPO REAL DESDE BBDD
+    // RELOJ TIEMPO REAL (TRABAJO)
     const reloj = document.getElementById('relojTiempoReal');
     let segundos = parseInt(reloj?.dataset?.segundos || 0);
 
-    let estadoActual = "{{ $ultimoTipo ?? '' }}"; // entrada | pausa | reanudar | salida
+    let estadoActual = "{{ $ultimoTipo ?? '' }}";
     let intervalo = null;
 
     function pintarReloj() {
@@ -185,8 +199,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    //  LÓGICA DE ESTADO
-    if (estadoActual === 'entrada' || estadoActual === 'reanudar' || estadoActual === 'pausa') {
+    if (estadoActual === 'entrada' || estadoActual === 'reanudar') {
         iniciarReloj();
     } else {
         pararReloj();
@@ -194,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     pintarReloj();
 
-    //  GPS
+    // GPS
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             pos => {

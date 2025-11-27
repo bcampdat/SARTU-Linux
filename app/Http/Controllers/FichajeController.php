@@ -9,11 +9,28 @@ use App\Models\ResumenDiario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Services\Fichaje\FichajeFactory;
+
+/**
+ * @OA\Tag(
+ *   name="Fichaje",
+ *   description="Operaciones de fichaje (vistas y acciones web)"
+ * )
+ */
 
 class FichajeController extends Controller
 {
     /**
      * EMPLEADO → botón de fichar + su propio resumen
+     */
+
+    /**
+     * @OA\Get(
+     *   path="/fichajes/create",
+     *   tags={"Fichaje"},
+     *   summary="Formulario de fichaje (vista empleado)",
+     *   @OA\Response(response=200, description="HTML view")
+     * )
      */
     public function create()
     {
@@ -38,24 +55,55 @@ class FichajeController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Post(
+     *   path="/fichajes",
+     *   tags={"Fichaje"},
+     *   summary="Registrar fichaje (form submission)",
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *       mediaType="application/x-www-form-urlencoded",
+     *       @OA\Schema(
+     *         @OA\Property(property="tipo", type="string", example="entrada"),
+     *         @OA\Property(property="metodo", type="string", example="web"),
+     *         @OA\Property(property="lat", type="number", format="float"),
+     *         @OA\Property(property="lng", type="number", format="float"),
+     *         @OA\Property(property="notas", type="string")
+     *       )
+     *     )
+     *   ),
+     *   @OA\Response(response=302, description="Redirect back with success"),
+     *   @OA\Response(response=422, description="Validation error")
+     * )
+     */
+
     public function store(Request $request)
     {
         $user = Auth::user();
 
         $request->validate([
-            'tipo' => 'required|in:entrada,salida,pausa,reanudar'
+            'tipo'   => 'required|in:entrada,salida,pausa,reanudar',
+            'metodo' => 'nullable|string|in:web,pwa,nfc,pc',
+            'lat'    => 'nullable|numeric',
+            'lng'    => 'nullable|numeric',
+            'notas'  => 'nullable|string',
         ]);
 
-        Fichaje::create([
-            'user_id'   => $user->id,
-            'metodo_id' => 1, // web_app por defecto
-            'tipo'      => $request->tipo,
-            'fecha_hora' => now(),
-            'lat' => $request->lat,
-            'lng' => $request->lng,
-        ]);
+        $metodo = $request->input('metodo', 'web');
 
-        // Recalcula resumen del día
+        try {
+            $strategy = FichajeFactory::make($metodo);
+        } catch (\Throwable $e) {
+            // fallback a web si hay error en la fábrica
+            $strategy = FichajeFactory::make('web');
+        }
+
+        $datos = $request->only(['tipo', 'lat', 'lng', 'notas']);
+
+        $strategy->fichar($user, $datos);
+
+        // Recalcula resumen del día (misma firma que antes)
         \App\Services\Resumen\ResumenService::recalcular(
             $user->id,
             now()->toDateString()
@@ -65,6 +113,16 @@ class FichajeController extends Controller
     }
     /**
      * ENCARGADO / ADMIN → resumen general
+     */
+
+    /**
+     * @OA\Get(
+     *   path="/fichajes",
+     *   tags={"Fichaje"},
+     *   summary="Resumen general (encargado/admin)",
+     *   @OA\Parameter(name="fecha", in="query", @OA\Schema(type="string", format="date")),
+     *   @OA\Response(response=200, description="HTML view")
+     * )
      */
     public function index(Request $request)
     {
@@ -96,6 +154,17 @@ class FichajeController extends Controller
             'fecha'      => $fecha
         ]);
     }
+
+    /**
+     * @OA\Get(
+     *   path="/fichajes/resumen-empresa",
+     *   tags={"Fichaje"},
+     *   summary="Resumen de empresa por fecha",
+     *   @OA\Parameter(name="fecha", in="query", @OA\Schema(type="string", format="date")),
+     *   @OA\Parameter(name="empresa_id", in="query", @OA\Schema(type="integer")),
+     *   @OA\Response(response=200, description="HTML view")
+     * )
+     */
     public function resumenEmpresa(Request $request)
     {
         $user = Auth::user();
@@ -132,7 +201,7 @@ class FichajeController extends Controller
             $empresas = Empresa::all();
         }
 
-        return view('empresas.resumen', compact(
+        return view('empresa.resumen', compact(
             'resumenes',
             'totalTrabajado',
             'totalPausas',
@@ -142,7 +211,17 @@ class FichajeController extends Controller
             'fecha'
         ));
     }
-    
+
+    /**
+     * @OA\Get(
+     *   path="/fichajes/estado-empresa",
+     *   tags={"Fichaje"},
+     *   summary="Estado actual de empleados por empresa",
+     *   @OA\Parameter(name="empresa_id", in="query", @OA\Schema(type="integer")),
+     *   @OA\Response(response=200, description="HTML view")
+     * )
+     */
+
     public function estadoEmpresa(Request $request)
     {
         $user = Auth::user();
@@ -162,16 +241,14 @@ class FichajeController extends Controller
         }
 
         $empresas = [];
-
         if ($user->rol->nombre === 'admin_sistema') {
             $empresas = Empresa::all();
         }
 
-        return view('empresas.estado', compact(
+        return view('empresa.estado', compact(
             'empleados',
             'empresaId',
             'empresas'
         ));
     }
 }
-

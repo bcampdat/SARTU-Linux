@@ -9,8 +9,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+
+/**
+ * @OA\Tag(
+ *   name="Usuario",
+ *   description="Operaciones sobre usuarios (vistas web)"
+ * )
+ */
+
 class UsuarioController extends Controller
 {
+    /**
+     * @OA\Get(
+     *   path="/usuarios",
+     *   tags={"Usuario"},
+     *   summary="Listado de usuarios (vista)",
+     *   @OA\Response(response=200, description="HTML view")
+     * )
+     */
     public function index()
     {
         $usuario = Auth::user();
@@ -38,6 +54,15 @@ class UsuarioController extends Controller
 
         return view('usuarios.index', compact('usuarios'));
     }
+
+    /**
+     * @OA\Get(
+     *   path="/usuarios/create",
+     *   tags={"Usuario"},
+     *   summary="Formulario creación usuario",
+     *   @OA\Response(response=200, description="HTML view")
+     * )
+     */
     public function create()
     {
         $usuario = Auth::user();
@@ -54,6 +79,29 @@ class UsuarioController extends Controller
 
         return view('usuarios.create', compact('empresas', 'roles'));
     }
+
+      /**
+     * @OA\Post(
+     *   path="/usuarios",
+     *   tags={"Usuario"},
+     *   summary="Crear usuario (form submission)",
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *       mediaType="application/x-www-form-urlencoded",
+     *       @OA\Schema(
+     *         @OA\Property(property="name", type="string"),
+     *         @OA\Property(property="email", type="string", format="email"),
+     *         @OA\Property(property="rol_id", type="integer"),
+     *         @OA\Property(property="empresa_id", type="integer")
+     *       )
+     *     )
+     *   ),
+     *   @OA\Response(response=302, description="Redirect (HTML)"),
+     *   @OA\Response(response=422, description="Validation error")
+     * )
+     */
+
     public function store(Request $request)
     {
         $usuario = Auth::user();
@@ -94,6 +142,16 @@ class UsuarioController extends Controller
             ->route('usuarios.index')
             ->with('success', "Usuario creado. Contraseña temporal: $tempPassword");
     }
+
+    /**
+     * @OA\Get(
+     *   path="/usuarios/{usuario}/edit",
+     *   tags={"Usuario"},
+     *   summary="Editar usuario (vista)",
+     *   @OA\Parameter(name="usuario", in="path", required=true, @OA\Schema(type="integer")),
+     *   @OA\Response(response=200, description="HTML view")
+     * )
+     */
     public function edit(Usuario $usuario)
     {
         $user = Auth::user();
@@ -107,6 +165,30 @@ class UsuarioController extends Controller
 
         return view('usuarios.edit', compact('usuario', 'empresas', 'roles'));
     }
+
+    /**
+     * @OA\Put(
+     *   path="/usuarios/{usuario}",
+     *   tags={"Usuario"},
+     *   summary="Actualizar usuario (form submission)",
+     *   @OA\Parameter(name="usuario", in="path", required=true, @OA\Schema(type="integer")),
+     *   @OA\RequestBody(
+     *     required=true,
+     *     @OA\MediaType(
+     *       mediaType="application/x-www-form-urlencoded",
+     *       @OA\Schema(
+     *         @OA\Property(property="name", type="string"),
+     *         @OA\Property(property="email", type="string", format="email"),
+     *         @OA\Property(property="rol_id", type="integer"),
+     *         @OA\Property(property="empresa_id", type="integer"),
+     *         @OA\Property(property="activo", type="boolean")
+     *       )
+     *     )
+     *   ),
+     *   @OA\Response(response=302, description="Redirect (HTML)"),
+     *   @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function update(Request $request, Usuario $usuario)
     {
         $user = Auth::user();
@@ -134,6 +216,16 @@ class UsuarioController extends Controller
         return redirect()->route('usuarios.index')
             ->with('success', 'Usuario actualizado correctamente.');
     }
+
+    /**
+     * @OA\Delete(
+     *   path="/usuarios/{usuario}",
+     *   tags={"Usuario"},
+     *   summary="Eliminar usuario",
+     *   @OA\Parameter(name="usuario", in="path", required=true, @OA\Schema(type="integer")),
+     *   @OA\Response(response=302, description="Redirect (HTML)")
+     * )
+     */
     public function destroy(Usuario $usuario)
     {
         $user = Auth::user();

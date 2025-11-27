@@ -20,7 +20,7 @@ Route::get('/', [DashboardController::class, 'index'])
 
 // AUTH (BREEZE)
 
-require_once __DIR__.'/auth.php';
+require_once __DIR__ . '/auth.php';
 
 
 // PERFIL
@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
+
 
 // CAMBIO PASSWORD OBLIGATORIO
 
@@ -44,7 +45,15 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'rol:admin_sistema'])->group(function () {
 
-    Route::resource('empresas', EmpresaController::class);
+    Route::resource('empresas', EmpresaController::class)->names([
+        'index'   => 'empresa.index',
+        'create'  => 'empresa.create',
+        'store'   => 'empresa.store',
+        'show'    => 'empresa.show',
+        'edit'    => 'empresa.edit',
+        'update'  => 'empresa.update',
+        'destroy' => 'empresa.destroy',
+    ]);
     Route::resource('usuarios', UsuarioController::class);
 
     Route::get('auditoria', [AuditoriaController::class, 'index'])
@@ -67,7 +76,6 @@ Route::middleware(['auth', 'rol:empleado,encargado'])->group(function () {
         ->name('fichaje.resumen');
 });
 
-
 // ENCARGADO
 
 Route::middleware(['auth', 'rol:encargado'])->group(function () {
@@ -76,26 +84,24 @@ Route::middleware(['auth', 'rol:encargado'])->group(function () {
     Route::get('empleados', [UsuarioController::class, 'empleadosEmpresa'])
         ->name('encargado.empleados');
 
-    // Fichajes empresa
-        Route::get('fichajes', [FichajeController::class, 'index'])
+    // Fichajes empresa (TABLA ANTIGUA)
+    Route::get('fichajes', [FichajeController::class, 'index'])
         ->name('fichajes.index');
 
-    // Resumen empresa
-    Route::get('resumen/resumen', [FichajeController::class, 'index'])
-        ->name('resumen.resumen');
-    
+    // Resumen empresa (TABLA ANTIGUA)
+    Route::get('empleados/resumen', [FichajeController::class, 'index'])
+        ->name('empleados.resumen');
 });
 
-// ENCARGADO + ADMIN
+// ENCARGADO + ADMIN SISTEMA
 
-Route::middleware(['auth', 'rol:encargado,admin_sistema'])->group(function () {
+Route::middleware(['auth', 'rol:admin_sistema,encargado'])->group(function () {
 
     // ESTADO TIEMPO REAL EMPRESA
-    Route::get('empresas/estado', [FichajeController::class, 'estadoEmpresa'])
-        ->name('empresas.estado');
+    Route::get('empresa/estado', [FichajeController::class, 'estadoEmpresa'])
+        ->name('empresa.estado');
 
     // RESUMEN DASHBOARD EMPRESA (NUEVO)
-    Route::get('empresas/resumen', [FichajeController::class, 'resumenEmpresa'])
-        ->name('empresas.resumen');
+    Route::get('empresa/resumen', [FichajeController::class, 'resumenEmpresa'])
+        ->name('empresa.resumen');
 });
-

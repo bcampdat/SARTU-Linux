@@ -7,8 +7,29 @@ use App\Models\Fichaje;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+
+/**
+ * @OA\Tag(
+ *   name="ResumenDiario",
+ *   description="Resúmenes diarios y listados (vistas web)"
+ * )
+ */
 class ResumenDiarioController extends Controller
 {
+    /**
+     * @OA\Get(
+     *   path="/resumen-diario",
+     *   tags={"ResumenDiario"},
+     *   summary="Ver resúmenes diarios (vista)",
+     *   @OA\Parameter(
+     *     name="fecha",
+     *     in="query",
+     *     description="Fecha del resumen (YYYY-MM-DD). Por defecto, hoy.",
+     *     @OA\Schema(type="string", format="date", example="2024-06-15")
+     *   ),
+     *   @OA\Response(response=200, description="HTML view")
+     * )
+     */
     public function index(Request $request)
     {
         $user = Auth::user();

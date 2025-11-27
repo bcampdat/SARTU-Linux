@@ -15,10 +15,19 @@ class RolMiddleware
             return redirect()->route('login');
         }
 
-        if (!$user->rol || !in_array($user->rol->nombre, $roles)) {
-            return abort(403, 'No tienes permisos para acceder a esta sección.');
+        
+        $map = [
+            'admin_sistema' => 1,
+            'encargado'     => 2,
+            'empleado'      => 3,
+        ];
+
+        foreach ($roles as $rol) {
+            if (isset($map[$rol]) && $user->rol_id == $map[$rol]) {
+                return $next($request);
+            }
         }
 
-        return $next($request);
+        return abort(403, 'No tienes permisos para acceder a esta sección.');
     }
 }

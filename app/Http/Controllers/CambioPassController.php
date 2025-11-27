@@ -44,7 +44,7 @@ class CambioPassController extends Controller
         $user->password = Hash::make($request->password);
         $user->estado = 'activo';
         $user->activo = 1;
-        $user->save();  
+        $user->save();
 
         return redirect()->route('dashboard')->with('success', 'Contraseña actualizada correctamente.');
     }

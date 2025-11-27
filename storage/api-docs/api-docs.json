@@ -1,0 +1,585 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "SARTU API",
+        "description": "Documentación OpenAPI mínima",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "Local server"
+        }
+    ],
+    "paths": {
+        "/api/health": {
+            "get": {
+                "summary": "Comprobación de estado",
+                "operationId": "c93f95c7380eef109f90afac28d02540",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/empresa": {
+            "get": {
+                "tags": [
+                    "Empresa"
+                ],
+                "summary": "Listado de empresas (vista)",
+                "operationId": "8913427cbfbc6b6759d466ef71e6e1a2",
+                "responses": {
+                    "200": {
+                        "description": "HTML view"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Empresa"
+                ],
+                "summary": "Crear empresa (form submission)",
+                "operationId": "921673159512f786566f64b031d6bd36",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    },
+                                    "limite_usuarios": {
+                                        "type": "integer"
+                                    },
+                                    "jornada_diaria_minutos": {
+                                        "type": "integer"
+                                    },
+                                    "max_pausa_no_contabilizada": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect (HTML)"
+                    }
+                }
+            }
+        },
+        "/empresa/create": {
+            "get": {
+                "tags": [
+                    "Empresa"
+                ],
+                "summary": "Formulario creación empresa",
+                "operationId": "5dffe436b84bc94eed8e78e119630ab2",
+                "responses": {
+                    "200": {
+                        "description": "HTML view"
+                    }
+                }
+            }
+        },
+        "/empresa/{empresa}/edit": {
+            "get": {
+                "tags": [
+                    "Empresa"
+                ],
+                "summary": "Editar empresa (formulario)",
+                "operationId": "42d39b64874512c6c3720733740e8dc3",
+                "parameters": [
+                    {
+                        "name": "empresa",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML view"
+                    }
+                }
+            }
+        },
+        "/empresa/{empresa}": {
+            "put": {
+                "tags": [
+                    "Empresa"
+                ],
+                "summary": "Actualizar empresa (form submission)",
+                "operationId": "070c9b4a0878e4de79835e8eda3a88e2",
+                "parameters": [
+                    {
+                        "name": "empresa",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    },
+                                    "limite_usuarios": {
+                                        "type": "integer"
+                                    },
+                                    "jornada_diaria_minutos": {
+                                        "type": "integer"
+                                    },
+                                    "max_pausa_no_contabilizada": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect (HTML)"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Empresa"
+                ],
+                "summary": "Eliminar empresa",
+                "operationId": "b32af6e9f9a08e8ffcd503d22c24cda0",
+                "parameters": [
+                    {
+                        "name": "empresa",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect (HTML)"
+                    }
+                }
+            }
+        },
+        "/fichajes/create": {
+            "get": {
+                "tags": [
+                    "Fichaje"
+                ],
+                "summary": "Formulario de fichaje (vista empleado)",
+                "operationId": "58c487fbc262588896b5687b18daf68a",
+                "responses": {
+                    "200": {
+                        "description": "HTML view"
+                    }
+                }
+            }
+        },
+        "/fichajes": {
+            "get": {
+                "tags": [
+                    "Fichaje"
+                ],
+                "summary": "Resumen general (encargado/admin)",
+                "operationId": "cb3fbe10b85205f60eea0431b4fc387b",
+                "parameters": [
+                    {
+                        "name": "fecha",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML view"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Fichaje"
+                ],
+                "summary": "Registrar fichaje (form submission)",
+                "operationId": "c044069f6f6ce03589a5d3b4b0a5f5ac",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "tipo": {
+                                        "type": "string",
+                                        "example": "entrada"
+                                    },
+                                    "metodo": {
+                                        "type": "string",
+                                        "example": "web"
+                                    },
+                                    "lat": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "lng": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "notas": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect back with success"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/fichajes/resumen-empresa": {
+            "get": {
+                "tags": [
+                    "Fichaje"
+                ],
+                "summary": "Resumen de empresa por fecha",
+                "operationId": "4672ee2327416b3309f36845a75a169b",
+                "parameters": [
+                    {
+                        "name": "fecha",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "empresa_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML view"
+                    }
+                }
+            }
+        },
+        "/fichajes/estado-empresa": {
+            "get": {
+                "tags": [
+                    "Fichaje"
+                ],
+                "summary": "Estado actual de empleados por empresa",
+                "operationId": "35baa386e1b371a854e2ed16eaf8e763",
+                "parameters": [
+                    {
+                        "name": "empresa_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML view"
+                    }
+                }
+            }
+        },
+        "/metodos-fichaje": {
+            "get": {
+                "tags": [
+                    "MetodoFichaje"
+                ],
+                "summary": "Lista de métodos de fichaje (vista)",
+                "operationId": "6ba5ba62c18e82fdae8506aac28e6eee",
+                "responses": {
+                    "200": {
+                        "description": "HTML view"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "MetodoFichaje"
+                ],
+                "summary": "Crear método de fichaje (form submission)",
+                "operationId": "b764ec8f3dc7229b9e0080f4ca8c4fc0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "web"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect (HTML)"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/resumen-diario": {
+            "get": {
+                "tags": [
+                    "ResumenDiario"
+                ],
+                "summary": "Ver resúmenes diarios (vista)",
+                "operationId": "ca7d50c76491d6b0afd2287949b9ee9d",
+                "parameters": [
+                    {
+                        "name": "fecha",
+                        "in": "query",
+                        "description": "Fecha del resumen (YYYY-MM-DD). Por defecto, hoy.",
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-06-15"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML view"
+                    }
+                }
+            }
+        },
+        "/usuarios": {
+            "get": {
+                "tags": [
+                    "Usuario"
+                ],
+                "summary": "Listado de usuarios (vista)",
+                "operationId": "856e795f5d5450966d6b2da23cad7554",
+                "responses": {
+                    "200": {
+                        "description": "HTML view"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Usuario"
+                ],
+                "summary": "Crear usuario (form submission)",
+                "operationId": "649b8ee4cb315de3c09d4f93fcc64588",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "rol_id": {
+                                        "type": "integer"
+                                    },
+                                    "empresa_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect (HTML)"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/usuarios/create": {
+            "get": {
+                "tags": [
+                    "Usuario"
+                ],
+                "summary": "Formulario creación usuario",
+                "operationId": "8abaf2adf21e766210966e0b12610f0a",
+                "responses": {
+                    "200": {
+                        "description": "HTML view"
+                    }
+                }
+            }
+        },
+        "/usuarios/{usuario}/edit": {
+            "get": {
+                "tags": [
+                    "Usuario"
+                ],
+                "summary": "Editar usuario (vista)",
+                "operationId": "beb714d603a9c52f617e336352557ba4",
+                "parameters": [
+                    {
+                        "name": "usuario",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML view"
+                    }
+                }
+            }
+        },
+        "/usuarios/{usuario}": {
+            "put": {
+                "tags": [
+                    "Usuario"
+                ],
+                "summary": "Actualizar usuario (form submission)",
+                "operationId": "c6692ad8a9294473c96eb8ad5f76cc15",
+                "parameters": [
+                    {
+                        "name": "usuario",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "rol_id": {
+                                        "type": "integer"
+                                    },
+                                    "empresa_id": {
+                                        "type": "integer"
+                                    },
+                                    "activo": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect (HTML)"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Usuario"
+                ],
+                "summary": "Eliminar usuario",
+                "operationId": "5c70f37950d3332311fc71d1fca928ac",
+                "parameters": [
+                    {
+                        "name": "usuario",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect (HTML)"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Empresa",
+            "description": "Operaciones sobre empresas (web forms)"
+        },
+        {
+            "name": "Fichaje",
+            "description": "Operaciones de fichaje (vistas y acciones web)"
+        },
+        {
+            "name": "MetodoFichaje",
+            "description": "Métodos de fichaje (web)"
+        },
+        {
+            "name": "ResumenDiario",
+            "description": "Resúmenes diarios y listados (vistas web)"
+        },
+        {
+            "name": "Usuario",
+            "description": "Operaciones sobre usuarios (vistas web)"
+        }
+    ]
+}

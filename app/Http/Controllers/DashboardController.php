@@ -31,6 +31,7 @@ class DashboardController extends Controller
         }
     }
 
+
     //  DASHBOARD ADMIN
 
     private function dashboardAdmin(Request $request)
@@ -63,6 +64,7 @@ class DashboardController extends Controller
             ]
         ]);
     }
+
 
     //  DASHBOARD ENCARGADO
 
@@ -139,20 +141,27 @@ class DashboardController extends Controller
         $user = Auth::user();
         $hoy = now()->toDateString();
 
+        // FICHAJES DEL DÍA ORDENADOS
         $fichajesHoy = Fichaje::where('user_id', $user->id)
             ->whereDate('fecha_hora', $hoy)
+            ->orderBy('fecha_hora')
             ->get();
 
+        // ÚLTIMO FICHAJE REAL (ESTADO ACTUAL)
+        $ultimoFichaje = Fichaje::where('user_id', $user->id)
+            ->latest('fecha_hora')
+            ->first();
+
+        // RESUMEN DEL DÍA
         $resumen = ResumenDiario::where('user_id', $user->id)
             ->whereDate('fecha', $hoy)
             ->first();
 
+        // HISTÓRICO RECIENTE
         $ultimosFichajes = Fichaje::where('user_id', $user->id)
             ->latest()
             ->take(6)
             ->get();
-
-        $ultimoFichaje = $fichajesHoy->last();
 
         return view('dashboard', [
             'vista' => '_dashEmpleado',
@@ -160,9 +169,7 @@ class DashboardController extends Controller
                 'resumen'          => $resumen,
                 'ultimosFichajes'  => $ultimosFichajes,
                 'fichajesHoy'      => $fichajesHoy,
-                'estado'           => $user->estado,
                 'ultimoFichaje'    => $ultimoFichaje
-
             ]
         ]);
     }

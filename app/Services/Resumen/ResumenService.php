@@ -13,8 +13,7 @@ class ResumenService
         $usuario = Usuario::with('empresa')->findOrFail($userId);
         $empresa = $usuario->empresa;
 
-        $jornadaMin     = $empresa->jornada_diaria_minutos ?? 480;
-        $maxPausaLibre  = $empresa->max_pausa_no_contabilizada ?? 0;
+        $maxPausaLibre = $empresa->max_pausa_no_contabilizada ?? 0;
 
         $fichajes = Fichaje::where('user_id', $userId)
             ->whereDate('fecha_hora', $fecha)
@@ -24,15 +23,15 @@ class ResumenService
         $trabajo = 0;
         $pausas  = 0;
 
-        $prevTipo   = null;
-        $prevHora   = null;
+        $prevTipo = null;
+        $prevHora = null;
 
         foreach ($fichajes as $f) {
 
             if ($prevTipo !== null) {
-
                 $mins = $prevHora->diffInMinutes($f->fecha_hora);
 
+                // TRABAJO
                 if (
                     in_array($prevTipo, ['entrada', 'reanudar']) &&
                     in_array($f->tipo, ['pausa', 'salida'])
@@ -40,13 +39,9 @@ class ResumenService
                     $trabajo += $mins;
                 }
 
-                if (
-                    $prevTipo === 'pausa' &&
-                    in_array($f->tipo, ['reanudar', 'salida'])
-                ) {
-                    if ($mins > $maxPausaLibre) {
-                        $pausas += $mins;
-                    }
+                // PAUSA (SE SUMA SIEMPRE)
+                if ($prevTipo === 'pausa' && in_array($f->tipo, ['reanudar', 'salida'])) {
+                    $pausas += $mins;
                 }
             }
 
