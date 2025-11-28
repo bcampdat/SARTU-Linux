@@ -1,14 +1,14 @@
 <x-guest-layout>
     <div class="text-center mb-8">
-        <h2 class="text-2xl font-bold text-sartu-negro">Iniciar Sesión</h2>
-        <p class="mt-2 text-sartu-gris-oscuro">Accede a tu cuenta SARTU</p>
+        <h2 class="text-2xl font-bold text-sartu-rojo">Iniciar Sesión</h2>
+        <p class="mt-2 text-sartu-negro">Accede a tu cuenta SARTU</p>
     </div>
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
         <div class="mb-6">
-            <label for="email" class="block text-sm font-medium text-sartu-negro mb-2">
+            <label for="email" class="block text-sm font-medium text-sartu-white mb-2">
                 Correo Electrónico
             </label>
             <input
@@ -25,7 +25,7 @@
         </div>
 
         <div class="mb-6">
-            <label for="password" class="block text-sm font-medium text-sartu-negro mb-2">
+            <label for="password" class="block text-sm font-medium text-sartu-white mb-2">
                 Contraseña
             </label>
             <input
@@ -44,7 +44,7 @@
             <label for="remember_me" class="flex items-center">
                 <input id="remember_me" type="checkbox" name="remember"
                     class="rounded border-gray-300 text-sartu-rojo focus:ring-sartu-rojo">
-                <span class="ms-2 text-sm text-sartu-gris-oscuro">Recordar sesión</span>
+                <span class="ms-2 text-sm text-sartu-negro">Recordar sesión</span>
             </label>
 
             @if (Route::has('password.request'))

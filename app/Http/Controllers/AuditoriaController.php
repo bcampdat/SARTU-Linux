@@ -7,9 +7,61 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\PDF;
 
-
+/**
+ * @OA\Tag(
+ *     name="Auditoría",
+ *     description="Gestión de registros de auditoría del sistema"
+ * )
+ */
 class AuditoriaController extends Controller
-{
+{   
+    /**
+     * @OA\Get(
+     *     path="/api/auditoria",
+     *     operationId="getAuditoria",
+     *     tags={"Auditoría"},
+     *     summary="Listar registros de auditoría",
+     *     description="Obtiene un listado paginado de registros de auditoría con filtros opcionales",
+     *     @OA\Parameter(
+     *         name="from",
+     *         in="query",
+     *         description="Fecha inicio (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="to",
+     *         in="query",
+     *         description="Fecha fin (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="accion",
+     *         in="query",
+     *         description="Filtrar por tipo de acción",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="usuario_id",
+     *         in="query",
+     *         description="ID del usuario",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Listado de registros de auditoría",
+     *         @OA\JsonContent(type="object")
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acceso denegado - rol insuficiente"
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -59,7 +111,54 @@ class AuditoriaController extends Controller
         return view('auditoria.index', compact('logs', 'usuariosFiltro'));
     }
 
-
+    /**
+     * @OA\Get(
+     *     path="/api/auditoria",
+     *     operationId="getAuditoria",
+     *     tags={"Auditoría"},
+     *     summary="Listar registros de auditoría",
+     *     description="Obtiene un listado paginado de registros de auditoría con filtros opcionales",
+     *     @OA\Parameter(
+     *         name="from",
+     *         in="query",
+     *         description="Fecha inicio (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="to",
+     *         in="query",
+     *         description="Fecha fin (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="accion",
+     *         in="query",
+     *         description="Filtrar por tipo de acción",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="usuario_id",
+     *         in="query",
+     *         description="ID del usuario",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Listado de registros de auditoría",
+     *         @OA\JsonContent(type="object")
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acceso denegado - rol insuficiente"
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
+    
     public function exportPdf(Request $request)
     {
         $user = Auth::user();

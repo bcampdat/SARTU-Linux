@@ -10,8 +10,31 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Services\AuditoriaService;
 
+/**
+ * @OA\Tag(
+ *     name="Usuarios",
+ *     description="Gestión de usuarios del sistema"
+ * )
+ */
+
 class UsuarioController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/usuarios",
+     *     operationId="getUsuarios",
+     *     tags={"Usuarios"},
+     *     summary="Listar usuarios",
+     *     description="Lista usuarios según el rol del solicitante: admin ve todos, encargado su empresa, empleado solo a sí mismo",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Listado de usuarios",
+     *         @OA\JsonContent(type="array", @OA\Items(type="object"))
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
+     */
+
     public function index()
     {
         $usuario = Auth::user();
@@ -40,6 +63,18 @@ class UsuarioController extends Controller
         return view('usuarios.index', compact('usuarios'));
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/usuarios/create",
+     *     operationId="createUsuarioForm",
+     *     tags={"Usuarios"},
+     *     summary="Formulario para crear usuario",
+     *     description="Retorna vista con formulario para crear un usuario (admin o encargado)",
+     *     @OA\Response(response=200, description="Formulario mostrado"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
+
     public function create()
     {
         $usuario = Auth::user();
@@ -56,7 +91,28 @@ class UsuarioController extends Controller
 
         return view('usuarios.create', compact('empresas', 'roles'));
     }
-
+    /**
+     * @OA\Post(
+     *     path="/api/usuarios",
+     *     operationId="storeUsuario",
+     *     tags={"Usuarios"},
+     *     summary="Crear usuario",
+     *     description="Crea un nuevo usuario. El encargado solo puede crear empleados en su empresa.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email","rol_id","empresa_id"},
+     *             @OA\Property(property="name", type="string", example="Juan Pérez"),
+     *             @OA\Property(property="email", type="string", format="email", example="juan@example.com"),
+     *             @OA\Property(property="rol_id", type="integer", example=3),
+     *             @OA\Property(property="empresa_id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(response=302, description="Redirección tras creación"),
+     *     @OA\Response(response=422, description="Validación fallida"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function store(Request $request)
     {
         $usuario = Auth::user();
@@ -118,7 +174,25 @@ class UsuarioController extends Controller
             ->route('usuarios.index')
             ->with('success', "Usuario creado. Contraseña temporal: $tempPassword");
     }
-
+    /**
+     * @OA\Get(
+     *     path="/api/usuarios/{usuario}",
+     *     operationId="getUsuario",
+     *     tags={"Usuarios"},
+     *     summary="Obtener usuario",
+     *     description="Retorna vista para editar un usuario",
+     *     @OA\Parameter(
+     *         name="usuario",
+     *         in="path",
+     *         description="ID del usuario",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Usuario encontrado"),
+     *     @OA\Response(response=404, description="No encontrado"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function edit(Usuario $usuario)
     {
         $user = Auth::user();
@@ -132,7 +206,36 @@ class UsuarioController extends Controller
 
         return view('usuarios.edit', compact('usuario', 'empresas', 'roles'));
     }
-
+    /**
+     * @OA\Put(
+     *     path="/api/usuarios/{usuario}",
+     *     operationId="updateUsuario",
+     *     tags={"Usuarios"},
+     *     summary="Actualizar usuario",
+     *     description="Actualiza datos de un usuario. Encargado solo usuarios de su empresa.",
+     *     @OA\Parameter(
+     *         name="usuario",
+     *         in="path",
+     *         description="ID del usuario",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email","rol_id","empresa_id","activo"},
+     *             @OA\Property(property="name", type="string", example="Nombre actualizado"),
+     *             @OA\Property(property="email", type="string", format="email", example="nuevo@example.com"),
+     *             @OA\Property(property="rol_id", type="integer", example=2),
+     *             @OA\Property(property="empresa_id", type="integer", example=1),
+     *             @OA\Property(property="activo", type="boolean", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(response=302, description="Redirección tras actualización"),
+     *     @OA\Response(response=422, description="Validación fallida"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function update(Request $request, Usuario $usuario)
     {
         $user = Auth::user();
@@ -173,7 +276,25 @@ class UsuarioController extends Controller
         return redirect()->route('usuarios.index')
             ->with('success', 'Usuario actualizado correctamente.');
     }
-
+    /**
+     * @OA\Delete(
+     *     path="/api/usuarios/{usuario}",
+     *     operationId="deleteUsuario",
+     *     tags={"Usuarios"},
+     *     summary="Eliminar usuario",
+     *     description="Elimina un usuario (encargado solo puede eliminar usuarios de su empresa)",
+     *     @OA\Parameter(
+     *         name="usuario",
+     *         in="path",
+     *         description="ID del usuario a eliminar",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=302, description="Redirección tras eliminación"),
+     *     @OA\Response(response=403, description="Permiso denegado"),
+     *     security={{"sanctum":{}}}
+     * )
+     */
     public function destroy(Usuario $usuario)
     {
         $user = Auth::user();
@@ -209,3 +330,4 @@ class UsuarioController extends Controller
         return view('usuarios.encargado_index', compact('empleados'));
     }
 }
+

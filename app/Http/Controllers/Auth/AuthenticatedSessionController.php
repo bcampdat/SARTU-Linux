@@ -10,10 +10,30 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use App\Services\AuditoriaService;
 
+
+/**
+ * @OA\Tag(
+ *     name="Autenticación",
+ *     description="Gestión de sesiones y autenticación de usuarios"
+ * )
+ */
+
 class AuthenticatedSessionController extends Controller
 {
-    /**
+     /**
      * Display the login view.
+     *
+     * @OA\Get(
+     *     path="/login",
+     *     operationId="showLoginForm",
+     *     tags={"Autenticación"},
+     *     summary="Mostrar formulario de login",
+     *     description="Retorna la vista del formulario de inicio de sesión",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Formulario de login mostrado exitosamente"
+     *     )
+     * )
      */
     public function create(): View
     {
@@ -22,6 +42,32 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Handle an incoming authentication request.
+     *
+     * @OA\Post(
+     *     path="/login",
+     *     operationId="login",
+     *     tags={"Autenticación"},
+     *     summary="Iniciar sesión",
+     *     description="Autentica un usuario con email y contraseña. Registra intentos de login en auditoría",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Credenciales del usuario",
+     *         @OA\JsonContent(
+     *             required={"email","password"},
+     *             @OA\Property(property="email", type="string", format="email", example="usuario@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123"),
+     *             @OA\Property(property="remember", type="boolean", example=false, description="Recordar sesión")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=302,
+     *         description="Redirección exitosa al dashboard o cambio de contraseña"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validación fallida - email o contraseña incorrectos"
+     *     )
+     * )
      */
     public function store(Request $request)
     {
@@ -107,6 +153,23 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Destroy an authenticated session.
+     *
+     * @OA\Post(
+     *     path="/logout",
+     *     operationId="logout",
+     *     tags={"Autenticación"},
+     *     summary="Cerrar sesión",
+     *     description="Cierra la sesión del usuario autenticado y registra la acción en auditoría",
+     *     @OA\Response(
+     *         response=302,
+     *         description="Redirección exitosa a página de inicio"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Usuario no autenticado"
+     *     ),
+     *     security={{"sanctum":{}}}
+     * )
      */
     public function destroy(Request $request): RedirectResponse
     {

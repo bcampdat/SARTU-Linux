@@ -3,39 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Informe de Auditoría</title>
-    <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; }
-        .header { text-align: center; margin-bottom: 15px; }
-        .header h1 { font-size: 16px; margin: 0; }
-        .header p { margin: 2px 0; }
-        .meta, .firma { margin-top: 10px; font-size: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-        th, td { border: 1px solid #444; padding: 4px; }
-        th { background: #ddd; }
-        .small { font-size: 9px; }
-        .firma { margin-top: 40px; text-align: right; }
-        .firma-linea {
-            margin-top: 40px;
-            border-top: 1px solid #000;
-            width: 220px;
-            float: right;
-            text-align: center;
-            padding-top: 3px;
-        }
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 8px;
-        }
-        .legal {
-            margin-top: 12px;
-            font-size: 9px;
-            text-align: justify;
-        }
-    </style>
 </head>
 <body>
 
@@ -44,7 +11,7 @@
 @endphp
 
     <div class="header">
-        <h1>INFORME DE AUDITORÍA DE ACTIVIDAD DEL SISTEMA</h1>
+        <h1>SARTU <br> INFORME DE AUDITORÍA DE ACTIVIDAD DEL SISTEMA</h1>
 
         <p><strong>Razón Social:</strong> {{ $razonSocial }}</p>
 
@@ -127,9 +94,6 @@
 
         <div class="firma-linea">
             {{ $generadoPor->name }}
-            <div class="small">
-                {{ $generadoPor->rol->nombre }}
-            </div>
         </div>
     </div>
 
