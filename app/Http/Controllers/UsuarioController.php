@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 namespace App\Http\Controllers;
 
@@ -8,25 +8,10 @@ use App\Models\Rol;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-
-
-/**
- * @OA\Tag(
- *   name="Usuario",
- *   description="Operaciones sobre usuarios (vistas web)"
- * )
- */
+use App\Services\AuditoriaService;
 
 class UsuarioController extends Controller
 {
-    /**
-     * @OA\Get(
-     *   path="/usuarios",
-     *   tags={"Usuario"},
-     *   summary="Listado de usuarios (vista)",
-     *   @OA\Response(response=200, description="HTML view")
-     * )
-     */
     public function index()
     {
         $usuario = Auth::user();
@@ -55,14 +40,6 @@ class UsuarioController extends Controller
         return view('usuarios.index', compact('usuarios'));
     }
 
-    /**
-     * @OA\Get(
-     *   path="/usuarios/create",
-     *   tags={"Usuario"},
-     *   summary="Formulario creación usuario",
-     *   @OA\Response(response=200, description="HTML view")
-     * )
-     */
     public function create()
     {
         $usuario = Auth::user();
@@ -79,28 +56,6 @@ class UsuarioController extends Controller
 
         return view('usuarios.create', compact('empresas', 'roles'));
     }
-
-      /**
-     * @OA\Post(
-     *   path="/usuarios",
-     *   tags={"Usuario"},
-     *   summary="Crear usuario (form submission)",
-     *   @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *       mediaType="application/x-www-form-urlencoded",
-     *       @OA\Schema(
-     *         @OA\Property(property="name", type="string"),
-     *         @OA\Property(property="email", type="string", format="email"),
-     *         @OA\Property(property="rol_id", type="integer"),
-     *         @OA\Property(property="empresa_id", type="integer")
-     *       )
-     *     )
-     *   ),
-     *   @OA\Response(response=302, description="Redirect (HTML)"),
-     *   @OA\Response(response=422, description="Validation error")
-     * )
-     */
 
     public function store(Request $request)
     {
@@ -124,9 +79,13 @@ class UsuarioController extends Controller
             }
         }
 
-        $tempPassword = substr(str_shuffle('abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 10);
+        $tempPassword = substr(
+            str_shuffle('abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'),
+            0,
+            10
+        );
 
-        Usuario::create([
+        $usuarioCreado = Usuario::create([
             'name'        => $request->name,
             'email'       => $request->email,
             'password'    => Hash::make($tempPassword),
@@ -138,20 +97,28 @@ class UsuarioController extends Controller
             'activo'      => 0,
         ]);
 
+        //  AUDITORÍA: creación de usuario
+        AuditoriaService::log(
+            'crear_usuario',
+            'Usuario',
+            $usuarioCreado->id,
+            null,
+            [
+                'name'       => $usuarioCreado->name,
+                'email'      => $usuarioCreado->email,
+                'rol_id'     => $usuarioCreado->rol_id,
+                'empresa_id' => $usuarioCreado->empresa_id,
+                'estado'     => $usuarioCreado->estado,
+                'activo'     => $usuarioCreado->activo,
+            ],
+            'Usuario creado con contraseña temporal'
+        );
+
         return redirect()
             ->route('usuarios.index')
             ->with('success', "Usuario creado. Contraseña temporal: $tempPassword");
     }
 
-    /**
-     * @OA\Get(
-     *   path="/usuarios/{usuario}/edit",
-     *   tags={"Usuario"},
-     *   summary="Editar usuario (vista)",
-     *   @OA\Parameter(name="usuario", in="path", required=true, @OA\Schema(type="integer")),
-     *   @OA\Response(response=200, description="HTML view")
-     * )
-     */
     public function edit(Usuario $usuario)
     {
         $user = Auth::user();
@@ -166,29 +133,6 @@ class UsuarioController extends Controller
         return view('usuarios.edit', compact('usuario', 'empresas', 'roles'));
     }
 
-    /**
-     * @OA\Put(
-     *   path="/usuarios/{usuario}",
-     *   tags={"Usuario"},
-     *   summary="Actualizar usuario (form submission)",
-     *   @OA\Parameter(name="usuario", in="path", required=true, @OA\Schema(type="integer")),
-     *   @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *       mediaType="application/x-www-form-urlencoded",
-     *       @OA\Schema(
-     *         @OA\Property(property="name", type="string"),
-     *         @OA\Property(property="email", type="string", format="email"),
-     *         @OA\Property(property="rol_id", type="integer"),
-     *         @OA\Property(property="empresa_id", type="integer"),
-     *         @OA\Property(property="activo", type="boolean")
-     *       )
-     *     )
-     *   ),
-     *   @OA\Response(response=302, description="Redirect (HTML)"),
-     *   @OA\Response(response=422, description="Validation error")
-     * )
-     */
     public function update(Request $request, Usuario $usuario)
     {
         $user = Auth::user();
@@ -205,6 +149,9 @@ class UsuarioController extends Controller
             'activo'      => 'required|boolean'
         ]);
 
+        // AUDITORÍA: antes de actualizar
+        $antes = $usuario->toArray();
+
         $usuario->update([
             'name'        => $request->name,
             'email'       => $request->email,
@@ -213,19 +160,20 @@ class UsuarioController extends Controller
             'activo'      => $request->activo,
         ]);
 
+        // AUDITORÍA: después de actualizar
+        AuditoriaService::log(
+            'editar_usuario',
+            'Usuario',
+            $usuario->id,
+            $antes,
+            $usuario->toArray(),
+            'Usuario actualizado'
+        );
+
         return redirect()->route('usuarios.index')
             ->with('success', 'Usuario actualizado correctamente.');
     }
 
-    /**
-     * @OA\Delete(
-     *   path="/usuarios/{usuario}",
-     *   tags={"Usuario"},
-     *   summary="Eliminar usuario",
-     *   @OA\Parameter(name="usuario", in="path", required=true, @OA\Schema(type="integer")),
-     *   @OA\Response(response=302, description="Redirect (HTML)")
-     * )
-     */
     public function destroy(Usuario $usuario)
     {
         $user = Auth::user();
@@ -233,6 +181,16 @@ class UsuarioController extends Controller
         if ($user->rol->nombre === 'encargado' && $usuario->empresa_id != $user->empresa_id) {
             abort(403);
         }
+
+        // AUDITORÍA: antes de eliminar
+        AuditoriaService::log(
+            'eliminar_usuario',
+            'Usuario',
+            $usuario->id,
+            $usuario->toArray(),
+            null,
+            'Usuario eliminado'
+        );
 
         $usuario->delete();
 

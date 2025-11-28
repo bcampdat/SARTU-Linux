@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Fichaje\FichajeFactory;
 use App\Models\Fichaje;
 use App\Models\Empresa;
 use App\Models\Usuario;
@@ -9,28 +10,12 @@ use App\Models\ResumenDiario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use App\Services\Fichaje\FichajeFactory;
-
-/**
- * @OA\Tag(
- *   name="Fichaje",
- *   description="Operaciones de fichaje (vistas y acciones web)"
- * )
- */
+use App\Services\AuditoriaService;
 
 class FichajeController extends Controller
 {
     /**
      * EMPLEADO → botón de fichar + su propio resumen
-     */
-
-    /**
-     * @OA\Get(
-     *   path="/fichajes/create",
-     *   tags={"Fichaje"},
-     *   summary="Formulario de fichaje (vista empleado)",
-     *   @OA\Response(response=200, description="HTML view")
-     * )
      */
     public function create()
     {
@@ -48,35 +33,12 @@ class FichajeController extends Controller
         $ultimoTipo = $ultimo->tipo ?? null;
 
         return view('fichajes.fichar', [
-            'usuario' => $user,
-            'ultimo'  => $ultimo,
-            'resumen' => $resumen,
-            'ultimoTipo'  => $ultimoTipo,
+            'usuario'    => $user,
+            'ultimo'     => $ultimo,
+            'resumen'    => $resumen,
+            'ultimoTipo' => $ultimoTipo,
         ]);
     }
-
-    /**
-     * @OA\Post(
-     *   path="/fichajes",
-     *   tags={"Fichaje"},
-     *   summary="Registrar fichaje (form submission)",
-     *   @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *       mediaType="application/x-www-form-urlencoded",
-     *       @OA\Schema(
-     *         @OA\Property(property="tipo", type="string", example="entrada"),
-     *         @OA\Property(property="metodo", type="string", example="web"),
-     *         @OA\Property(property="lat", type="number", format="float"),
-     *         @OA\Property(property="lng", type="number", format="float"),
-     *         @OA\Property(property="notas", type="string")
-     *       )
-     *     )
-     *   ),
-     *   @OA\Response(response=302, description="Redirect back with success"),
-     *   @OA\Response(response=422, description="Validation error")
-     * )
-     */
 
     public function store(Request $request)
     {
@@ -101,9 +63,27 @@ class FichajeController extends Controller
 
         $datos = $request->only(['tipo', 'lat', 'lng', 'notas']);
 
+        // ejecutar el fichaje
         $strategy->fichar($user, $datos);
 
-        // Recalcula resumen del día (misma firma que antes)
+        // registrar en auditoría
+        AuditoriaService::log(
+            'fichaje_' . $datos['tipo'],
+            'Fichaje',
+            null,
+            null,
+            [
+                'user_id' => $user->id,
+                'tipo'    => $datos['tipo'],
+                'metodo'  => $metodo,
+                'lat'     => $datos['lat'] ?? null,
+                'lng'     => $datos['lng'] ?? null,
+                'notas'   => $datos['notas'] ?? null,
+            ],
+            'Fichaje realizado por el usuario'
+        );
+
+        // recalcular resumen diario
         \App\Services\Resumen\ResumenService::recalcular(
             $user->id,
             now()->toDateString()
@@ -111,30 +91,19 @@ class FichajeController extends Controller
 
         return back()->with('success', 'Movimiento registrado.');
     }
-    /**
-     * ENCARGADO / ADMIN → resumen general
-     */
 
     /**
-     * @OA\Get(
-     *   path="/fichajes",
-     *   tags={"Fichaje"},
-     *   summary="Resumen general (encargado/admin)",
-     *   @OA\Parameter(name="fecha", in="query", @OA\Schema(type="string", format="date")),
-     *   @OA\Response(response=200, description="HTML view")
-     * )
+     * ENCARGADO / ADMIN → resumen general
      */
     public function index(Request $request)
     {
         $user = Auth::user();
-
         $fecha = $request->input('fecha', Carbon::now()->toDateString());
 
         // ADMIN → ve todas las empresas
         if ($user->rol->nombre === 'admin_sistema') {
             $empleados = Usuario::with('empresa', 'rol')->get();
         }
-
         // ENCARGADO → solo empleados de su empresa
         else {
             $empleados = Usuario::where('empresa_id', $user->empresa_id)
@@ -142,32 +111,21 @@ class FichajeController extends Controller
                 ->get();
         }
 
-        // Resumenes ya calculados
         $resumenes = ResumenDiario::whereDate('fecha', $fecha)
             ->whereIn('user_id', $empleados->pluck('id'))
             ->get()
             ->keyBy('user_id');
 
         return view('resumen.res_gnral', [
-            'empleados'  => $empleados,
-            'resumenes'  => $resumenes,
-            'fecha'      => $fecha
+            'empleados' => $empleados,
+            'resumenes' => $resumenes,
+            'fecha'     => $fecha
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *   path="/fichajes/resumen-empresa",
-     *   tags={"Fichaje"},
-     *   summary="Resumen de empresa por fecha",
-     *   @OA\Parameter(name="fecha", in="query", @OA\Schema(type="string", format="date")),
-     *   @OA\Parameter(name="empresa_id", in="query", @OA\Schema(type="integer")),
-     *   @OA\Response(response=200, description="HTML view")
-     * )
-     */
     public function resumenEmpresa(Request $request)
     {
-        $user = Auth::user();
+        $user  = Auth::user();
         $fecha = $request->get('fecha', now()->toDateString());
 
         if ($user->rol->nombre === 'admin_sistema') {
@@ -212,16 +170,6 @@ class FichajeController extends Controller
         ));
     }
 
-    /**
-     * @OA\Get(
-     *   path="/fichajes/estado-empresa",
-     *   tags={"Fichaje"},
-     *   summary="Estado actual de empleados por empresa",
-     *   @OA\Parameter(name="empresa_id", in="query", @OA\Schema(type="integer")),
-     *   @OA\Response(response=200, description="HTML view")
-     * )
-     */
-
     public function estadoEmpresa(Request $request)
     {
         $user = Auth::user();
@@ -237,7 +185,7 @@ class FichajeController extends Controller
         foreach ($empleados as $emp) {
             $ultimo = $emp->fichajes()->latest('fecha_hora')->first();
             $emp->estado_actual = $ultimo->tipo ?? 'salida';
-            $emp->hora_estado  = $ultimo?->fecha_hora;
+            $emp->hora_estado   = $ultimo?->fecha_hora;
         }
 
         $empresas = [];

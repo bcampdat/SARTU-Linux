@@ -1,7 +1,7 @@
 <x-app-layout>
 
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-sartu-negro">
+        <h2 class="font-semibold text-xl text-sartu-white">
             Resumen Diario - Empresa
         </h2>
     </x-slot>

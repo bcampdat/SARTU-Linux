@@ -1,7 +1,7 @@
 <x-app-layout>
 
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-sartu-negro">
+        <h2 class="font-semibold text-xl text-sartu-white">
             Resumen Empresa
         </h2>
     </x-slot>
@@ -10,6 +10,7 @@
 
         {{-- FILTRO ADMIN --}}
         @if(auth()->user()->rol_id === 1 || auth()->user()->rol_id === 2)
+            
             <form method="GET" class="flex flex-wrap gap-4 items-center mb-6">
                 <div>
                     <label for="empresa_id" class="font-semibold text-sm">Empresa:</label>

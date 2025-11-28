@@ -105,3 +105,14 @@ Route::middleware(['auth', 'rol:admin_sistema,encargado'])->group(function () {
     Route::get('empresa/resumen', [FichajeController::class, 'resumenEmpresa'])
         ->name('empresa.resumen');
 });
+
+
+// AUDITORIA
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/auditoria', [AuditoriaController::class, 'index'])
+        ->name('auditoria.index');
+
+    Route::get('/auditoria/pdf', [AuditoriaController::class, 'exportPdf'])
+        ->name('auditoria.export.pdf');
+});

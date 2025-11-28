@@ -1,6 +1,6 @@
 <x-guest-layout>
     <div class="text-center mb-8">
-        <h2 class="text-2xl font-bold text-sartu-negro">Cambio de Contraseña Obligatorio</h2>
+        <h2 class="text-2xl font-bold text-sartu-white">Cambio de Contraseña Obligatorio</h2>
 
         @if(session('info'))
             <div class="mt-3 text-blue-600">
@@ -13,7 +13,7 @@
         @csrf
 
         <div class="mb-6">
-            <label for ="password" class="block text-sm font-medium text-sartu-negro mb-2">
+            <label for ="password" class="block text-sm font-medium text-sartu-white mb-2">
                 Nueva contraseña
             </label>
             <input type="password" name="password" class="w-full px-4 py-3 border rounded-lg" required>
@@ -21,7 +21,7 @@
         </div>
 
         <div class="mb-6">
-            <label for ="password_confirmation" class="block text-sm font-medium text-sartu-negro mb-2">
+            <label for ="password_confirmation" class="block text-sm font-medium text-sartu-white mb-2">
                 Confirmar contraseña
             </label>
             <input type="password" name="password_confirmation" class="w-full px-4 py-3 border rounded-lg" required>

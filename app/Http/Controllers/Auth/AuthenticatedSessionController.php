@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use App\Services\AuditoriaService;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -29,13 +30,34 @@ class AuthenticatedSessionController extends Controller
             'password' => 'required',
         ]);
 
+        //  LOGIN FALLIDO
         if (!Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+
+            AuditoriaService::log(
+                'login_fallido',
+                'Usuario',
+                null,
+                null,
+                ['email' => $request->email],
+                'Intento de acceso fallido'
+            );
+
             throw ValidationException::withMessages([
                 'email' => 'El correo o la contraseña no son correctos.',
             ]);
         }
 
         $user = Auth::user();
+
+        //  LOGIN CORRECTO
+        AuditoriaService::log(
+            'login_correcto',
+            'Usuario',
+            $user->id,
+            null,
+            null,
+            'Inicio de sesión correcto'
+        );
 
         // SUPERADMIN: acceso directo
         if ($user->rol->nombre === 'admin_sistema') {
@@ -45,7 +67,18 @@ class AuthenticatedSessionController extends Controller
 
         // Usuario BLOQUEADO
         if ($user->estado === 'bloqueado') {
+
+            AuditoriaService::log(
+                'login_bloqueado',
+                'Usuario',
+                $user->id,
+                null,
+                null,
+                'Intento de acceso con cuenta bloqueada'
+            );
+
             Auth::logout();
+
             throw ValidationException::withMessages([
                 'email' => 'Tu cuenta está bloqueada. Contacta con tu empresa.',
             ]);
@@ -53,6 +86,16 @@ class AuthenticatedSessionController extends Controller
 
         // Usuario pendiente → obligar a cambiar la contraseña
         if ($user->estado === 'pendiente') {
+
+            AuditoriaService::log(
+                'login_pendiente',
+                'Usuario',
+                $user->id,
+                null,
+                null,
+                'Acceso inicial con contraseña temporal'
+            );
+
             $request->session()->regenerate();
             return redirect()->route('password.force-change');
         }
@@ -67,6 +110,16 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        //  LOGOUT
+        AuditoriaService::log(
+            'logout',
+            'Usuario',
+            Auth::id(),
+            null,
+            null,
+            'Cierre de sesión'
+        );
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

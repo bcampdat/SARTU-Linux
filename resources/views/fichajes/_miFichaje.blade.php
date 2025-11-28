@@ -16,15 +16,23 @@ $pausaRestante = max(0, $pausaMax - $pausas);
 // HORAS EXTRA (solo informativa)
 $extraMin = max(0, $trabajado - $jornada);
 
-// ⏱ TIEMPO REAL DESDE EL ÚLTIMO FICHAJE
-$segundosBase = 0;
+// SEGUNDOS BASE DESDE BACKEND
+$segundosTrabajoBase = $trabajado * 60;
+$segundosPausaBase   = $pausas * 60;
 
-if (
-    !empty($ultimoFichaje) &&
-    in_array($ultimoTipo, ['entrada', 'reanudar']) &&
-    $ultimoFichaje->fecha_hora->isToday()
-) {
-    $segundosBase = $ultimoFichaje->fecha_hora->diffInSeconds(now());
+$segundosTrabajoActual = $segundosTrabajoBase;
+$segundosPausaActual   = $segundosPausaBase;
+
+if (!empty($ultimoFichaje) && $ultimoFichaje->fecha_hora->isToday()) {
+    $diff = $ultimoFichaje->fecha_hora->diffInSeconds(now());
+
+    if (in_array($ultimoTipo, ['entrada', 'reanudar'])) {
+        $segundosTrabajoActual += $diff;
+    }
+
+    if ($ultimoTipo === 'pausa') {
+        $segundosPausaActual += $diff;
+    }
 }
 @endphp
 
@@ -34,14 +42,19 @@ if (
         Mi Jornada de Hoy
     </h2>
 
-    {{-- RELOJ EN TIEMPO REAL (TRABAJO) --}}
+    {{-- RELOJ TRABAJO --}}
     <div
-        id="relojTiempoReal"
+        id="relojTrabajo"
         class="text-4xl font-mono font-bold text-sartu-rojo"
-        data-segundos="{{ $segundosBase }}"
-    >
-        00:00:00
-    </div>
+        data-segundos="{{ $segundosTrabajoActual }}"
+    >00:00:00</div>
+
+    {{-- RELOJ PAUSA --}}
+    <div
+        id="relojPausa"
+        class="text-xl font-mono font-bold text-yellow-500"
+        data-segundos="{{ $segundosPausaActual }}"
+    >00:00:00</div>
 
     {{-- ESTADO ACTUAL --}}
     <p class="text-lg font-semibold">
@@ -92,14 +105,13 @@ if (
         </div>
     </div>
 
-    {{-- ALERTA EXCESO PAUSA --}}
+    {{-- ALERTAS --}}
     @if($pausas > $pausaMax)
         <div class="bg-red-600 text-white p-3 rounded-lg mt-4">
             ⚠ Has superado el tiempo de pausa permitido
         </div>
     @endif
 
-    {{-- ALERTA HORAS EXTRA --}}
     @if($extraMin > 0)
         <div class="bg-orange-500 text-white p-3 rounded-lg mt-2">
             ⚠ Estás en horas extra (+{{ $extraMin }} min sobre la jornada)
@@ -107,53 +119,33 @@ if (
     @endif
 
     {{-- BOTONES --}}
-    <form
-        method="POST"
-        action="{{ route('fichajes.store') }}"
-        class="flex flex-wrap gap-6 justify-center mt-6"
-    >
+    <form method="POST" action="{{ route('fichajes.store') }}" class="flex flex-wrap gap-6 justify-center mt-6">
         @csrf
         <input type="hidden" name="lat" id="lat">
         <input type="hidden" name="lng" id="lng">
 
         @if(!$ultimoTipo || $ultimoTipo === 'salida')
-            <button
-                type="submit"
-                name="tipo"
-                value="entrada"
-                class="px-8 py-4 bg-green-600 text-white rounded-xl text-xl shadow"
-            >
+            <button type="submit" name="tipo" value="entrada"
+                class="px-8 py-4 bg-green-600 text-white rounded-xl text-xl shadow">
                 ENTRADA
             </button>
         @endif
 
         @if($ultimoTipo === 'entrada' || $ultimoTipo === 'reanudar')
-            <button
-                type="submit"
-                name="tipo"
-                value="pausa"
-                class="px-8 py-4 bg-yellow-500 text-white rounded-xl text-xl shadow"
-            >
+            <button type="submit" name="tipo" value="pausa"
+                class="px-8 py-4 bg-yellow-500 text-white rounded-xl text-xl shadow">
                 PAUSA
             </button>
 
-            <button
-                type="submit"
-                name="tipo"
-                value="salida"
-                class="px-8 py-4 bg-red-600 text-white rounded-xl text-xl shadow"
-            >
+            <button type="submit" name="tipo" value="salida"
+                class="px-8 py-4 bg-red-600 text-white rounded-xl text-xl shadow">
                 SALIDA
             </button>
         @endif
 
         @if($ultimoTipo === 'pausa')
-            <button
-                type="submit"
-                name="tipo"
-                value="reanudar"
-                class="px-8 py-4 bg-sartu-gris-oscuro text-white rounded-xl text-xl shadow"
-            >
+            <button type="submit" name="tipo" value="reanudar"
+                class="px-8 py-4 bg-sartu-gris-oscuro text-white rounded-xl text-xl shadow">
                 REANUDAR
             </button>
         @endif
@@ -163,63 +155,57 @@ if (
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    // PROGRESO
     const barra = document.getElementById('barraProgreso');
-    if (barra) {
-        const progreso = barra.dataset.progreso || 0;
-        barra.style.width = progreso + '%';
-    }
+    if (barra) barra.style.width = (barra.dataset.progreso || 0) + '%';
 
-    // RELOJ TIEMPO REAL (TRABAJO)
-    const reloj = document.getElementById('relojTiempoReal');
-    let segundos = parseInt(reloj?.dataset?.segundos || 0);
+    const relojTrabajo = document.getElementById('relojTrabajo');
+    const relojPausa   = document.getElementById('relojPausa');
+
+    let segundosTrabajo = parseInt(relojTrabajo.dataset.segundos || 0);
+    let segundosPausa   = parseInt(relojPausa.dataset.segundos || 0);
 
     let estadoActual = "{{ $ultimoTipo ?? '' }}";
-    let intervalo = null;
+    let intervaloTrabajo = null;
+    let intervaloPausa   = null;
 
-    function pintarReloj() {
-        const h = String(Math.floor(segundos / 3600)).padStart(2, '0');
-        const m = String(Math.floor((segundos % 3600) / 60)).padStart(2, '0');
-        const s = String(segundos % 60).padStart(2, '0');
-        reloj.innerText = `${h}:${m}:${s}`;
+    function formato(seg) {
+        const h = String(Math.floor(seg / 3600)).padStart(2, '0');
+        const m = String(Math.floor((seg % 3600) / 60)).padStart(2, '0');
+        const s = String(seg % 60).padStart(2, '0');
+        return `${h}:${m}:${s}`;
     }
 
-    function iniciarReloj() {
-        if (intervalo) return;
-        intervalo = setInterval(() => {
-            segundos++;
-            pintarReloj();
+    function pintar() {
+        relojTrabajo.innerText = formato(segundosTrabajo);
+        relojPausa.innerText   = formato(segundosPausa);
+    }
+
+    function iniciarTrabajo() {
+        if (intervaloTrabajo) return;
+        intervaloTrabajo = setInterval(() => {
+            segundosTrabajo++;
+            pintar();
         }, 1000);
     }
 
-    function pararReloj() {
-        if (intervalo) {
-            clearInterval(intervalo);
-            intervalo = null;
-        }
+    function iniciarPausa() {
+        if (intervaloPausa) return;
+        intervaloPausa = setInterval(() => {
+            segundosPausa++;
+            pintar();
+        }, 1000);
     }
 
-    if (estadoActual === 'entrada' || estadoActual === 'reanudar') {
-        iniciarReloj();
-    } else {
-        pararReloj();
+    function pararTodo() {
+        clearInterval(intervaloTrabajo);
+        clearInterval(intervaloPausa);
+        intervaloTrabajo = null;
+        intervaloPausa   = null;
     }
 
-    pintarReloj();
+    if (estadoActual === 'entrada' || estadoActual === 'reanudar') iniciarTrabajo();
+    if (estadoActual === 'pausa') iniciarPausa();
 
-    // GPS
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                const lat = document.getElementById('lat');
-                const lng = document.getElementById('lng');
-                if (lat && lng) {
-                    lat.value = pos.coords.latitude;
-                    lng.value = pos.coords.longitude;
-                }
-            },
-            () => {}
-        );
-    }
+    pintar();
 });
 </script>
