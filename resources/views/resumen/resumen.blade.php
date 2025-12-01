@@ -6,7 +6,7 @@
     <div class="py-6 max-w-3xl mx-auto space-y-6">
 
         <form method="GET" class="mb-4">
-            <label for ="fecha" class="font-semibold">Fecha:</label>
+            <label for="fecha" class="font-semibold text-white">Fecha:</label>
             <input type="date" name="fecha" value="{{ $fecha }}" class="border px-2 py-1">
             <button class="px-4 py-1 bg-sartu-rojo text-white rounded ml-2">Filtrar</button>
         </form>
@@ -31,7 +31,6 @@
                     @foreach($fichajes as $f)
                         <li>
                             <strong>{{ ucfirst($f->tipo) }}</strong>
-                            — {{ $f->fecha_hora->format('H:i') }}
                         </li>
                     @endforeach
                 </ul>

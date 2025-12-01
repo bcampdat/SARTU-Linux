@@ -4,15 +4,15 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-// use Illuminate\Notifications\Notifiable;
-// use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 // sartu@sartu.com
 // Pass123.
 
 class Usuario extends Authenticatable
 {
-    // use HasApiTokens, Notifiable;
+     use HasApiTokens, Notifiable;
 
     protected $table = 'users';
     protected $primaryKey = 'id';
