@@ -18,31 +18,8 @@ class ResumenDiario extends Model
         'tiempo_total'
     ];
 
-     protected $appends = [
-        'alerta_pausa',
-        'alerta_jornada',
-    ];
-
-    public function getAlertaPausaAttribute()
-    {
-        $empresa = $this->usuario->empresa ?? null;
-        if (!$empresa) return false;
-
-        return $this->tiempo_pausas > $empresa->max_pausa_no_contabilizada;
-    }
-
-    public function getAlertaJornadaAttribute()
-    {
-        $empresa = $this->usuario->empresa ?? null;
-        if (!$empresa) return false;
-
-        return $this->tiempo_trabajado > $empresa->jornada_diaria_minutos;
-    }
-
     public function usuario()
     {
         return $this->belongsTo(Usuario::class, 'user_id', 'id');
     }
-
 }
-

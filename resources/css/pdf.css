@@ -1,31 +1,152 @@
-body { font-family: DejaVu Sans, sans-serif; font-size: 11px; }
-        .header { text-align: center; margin-bottom: 15px; }
-        .header h1 { font-size: 16px; margin: 0; }
-        .header p { margin: 2px 0; }
-        .meta, .firma { margin-top: 10px; font-size: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-        th, td { border: 1px solid #444; padding: 4px; }
-        th { background: #ddd; }
-        .small { font-size: 9px; }
-        .firma { margin-top: 40px; text-align: right; }
-        .firma-linea {
-            margin-top: 40px;
-            border-top: 1px solid #000;
-            width: 220px;
-            float: right;
-            text-align: center;
-            padding-top: 3px;
-        }
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 8px;
-        }
-        .legal {
-            margin-top: 12px;
-            font-size: 9px;
-            text-align: justify;
-        }
+/* Se impone solo en el PDF generado por tu sistema SARTU
+ Luego, al imprimir el PDF, ese layout ya está “grabado”
+ El usuario NO puede romper esos márgenes desde la impresora */
+
+/* ==========================================================
+   CONFIGURACIÓN GENERAL DEL PDF (LEGAL)
+   ========================================================== */
+
+@page {
+    margin: 25px 25px 45px 25px;
+}
+
+body {
+    font-family: DejaVu Sans, sans-serif;
+    font-size: 11px;
+    color: #262222;
+    margin: 0;
+    margin-top: 230px;   /* ESPACIO REAL PARA CABECERA FIJA */
+}
+
+/* ===== COLORES ===== */
+.sartu-rojo { color: #4c2882; }
+.sartu-gris { color: #686868; }
+
+/* ===== CABECERA NORMAL ===== */
+.header {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 0;   /* MUY IMPORTANTE */
+}
+
+.header-table { width: 100%; }
+.header-table td { vertical-align: middle; }
+
+.titulo {
+    font-size: 16px;
+    font-weight: bold;
+    color: #4c2882;
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+.subtitulo {
+    font-size: 11px;
+    color: #686868;
+    text-align: center;
+}
+
+.meta {
+    margin-top: 10px;
+    font-size: 10px;
+}
+
+/* ===== CABECERA FIJA REPETIDA ===== */
+.pdf-header-fixed {
+    position: fixed;
+    top: 25px;
+    left: 25px;
+    right: 25px;
+}
+
+/* ===== BLOQUES ===== */
+.box {
+    border: 1px solid #ccc;
+    padding: 8px;
+    margin-top: 12px;
+    border-radius: 4px;
+}
+
+.box-title {
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #4c2882;
+}
+
+/* ===== TABLAS ===== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+    page-break-inside: auto;
+}
+
+thead { display: table-header-group; }
+tfoot { display: table-footer-group; }
+
+th {
+    background: #4c2882;
+    color: white;
+    padding: 6px;
+    border: 1px solid #444;
+    font-size: 10px;
+}
+
+td {
+    border: 1px solid #bbb;
+    padding: 5px;
+    font-size: 10px;
+}
+
+tr {
+    page-break-inside: avoid;
+}
+
+tbody tr:nth-child(even) {
+    background: #f2f2f2;
+}
+
+.small {
+    font-size: 9px;
+    color: #555;
+}
+
+/* ===== TEXTO LEGAL ===== */
+.legal {
+    font-size: 9px;
+    margin-top: 14px;
+    text-align: justify;
+    page-break-inside: avoid;
+}
+
+/* ===== FIRMA ===== */
+.firma {
+    margin-top: 40px;
+    text-align: right;
+    page-break-inside: avoid;
+}
+
+.firma-linea {
+    margin-top: 25px;
+    border-top: 1px solid #000;
+    width: 240px;
+    float: right;
+    text-align: center;
+    padding-top: 3px;
+    font-size: 10px;
+}
+
+/* ===== PIE LEGAL ===== */
+.footer {
+    position: fixed;
+    bottom: 22px;
+    left: 25px;
+    right: 25px;
+    font-size: 8px;
+    color: #444;
+}
+
+/* ===== SALTOS MANUALES ===== */
+.page-break {
+    page-break-before: always;
+}

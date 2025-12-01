@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-sartu-negro">
+        <h2 class="font-semibold text-xl text-sartu-white">
             Editar Usuario
         </h2>
     </x-slot>
@@ -12,15 +12,16 @@
 
             @include('usuarios._form', ['usuario' => $usuario])
 
-            <button type="submit"
-                class="mt-4 px-4 py-2 bg-sartu-rojo text-white rounded hover:bg-sartu-rojo-oscuro">
-                Actualizar Usuario
-            </button>
+            <div class="mt-6 flex justify-between">
+                <a href="{{ route('usuarios.index') }}"
+                    class="px-4 py-2  text-gris-oscuro rounded hover:text-sartu-rojo-oscuro">
+                    Cancelar
+                </a>
 
-            <a href="{{ url()->previous() }}"
-                class="mt-4 px-4 py-2 bg-sartu-marron text-white rounded hover:bg-sartu-gris-oscuro">
-                Cancelar
-            </a>
+                <button class="px-4 py-2 bg-sartu-rojo text-white rounded hover:bg-sartu-rojo-oscuro">
+                    Actualizar
+                </button>
+            </div>
         </form>
     </div>
 </x-app-layout>

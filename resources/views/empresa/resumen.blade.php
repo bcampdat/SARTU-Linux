@@ -1,5 +1,4 @@
 <x-app-layout>
-
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-sartu-white">
             Resumen Empresa
@@ -9,8 +8,7 @@
     <div class="py-6 max-w-7xl mx-auto space-y-6">
 
         {{-- FILTRO ADMIN --}}
-        @if(auth()->user()->rol_id === 1 || auth()->user()->rol_id === 2)
-            
+        @if(auth()->user()->rol_id === 1)
             <form method="GET" class="flex flex-wrap gap-4 items-center mb-6">
                 <div>
                     <label for="empresa_id" class="font-semibold text-sm">Empresa:</label>
@@ -24,7 +22,6 @@
                         @endforeach
                     </select>
                 </div>
-
                 <div>
                     <label for="fecha" class="font-semibold text-sm">Fecha:</label>
                     <input type="date" name="fecha" value="{{ $fecha }}"

@@ -20,42 +20,46 @@
 
                     {{-- ADMIN --}}
                     @if(Auth::user()->rol_id === 1)
-                        <x-nav-link :href="route('empresa.index')" :active="request()->routeIs('empresa.*')">
-                            Empresas
-                        </x-nav-link>
+                    <x-nav-link :href="route('empresa.index')" :active="request()->routeIs('empresa.*')">
+                        Empresas
+                    </x-nav-link>
 
-                        <x-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
-                            Usuarios
-                        </x-nav-link>
+                    <x-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
+                        Usuarios
+                    </x-nav-link>
 
-                        <x-nav-link :href="route('auditoria.index')" :active="request()->routeIs('auditoria.*')">
-                            Auditoría
-                        </x-nav-link>
+                    <x-nav-link :href="route('auditoria.index')" :active="request()->routeIs('auditoria.*')">
+                        Auditoría
+                    </x-nav-link>
                     @endif
 
 
                     {{-- ENCARGADO --}}
                     @if(Auth::user()->rol_id === 2 )
 
-                        <x-nav-link :href="route('empresa.estado')" :active="request()->routeIs('empresa.estado')">
-                            Estado Empresa
-                        </x-nav-link>
+                    <x-nav-link :href="route('auditoria.index')" :active="request()->routeIs('auditoria.*')">
+                        Auditoría
+                    </x-nav-link>
 
-                        <x-nav-link :href="route('empresa.resumen')" :active="request()->routeIs('empresa.resumen')">
-                            Resumen Empresa
-                        </x-nav-link>
+                    <x-nav-link :href="route('empresa.estado')" :active="request()->routeIs('empresa.estado')">
+                        Estado Empresa
+                    </x-nav-link>
 
-                        <x-nav-link :href="route('encargado.empleados')" :active="request()->routeIs('encargado.empleados')">
-                            Empleados
-                        </x-nav-link>
+                    <x-nav-link :href="route('empresa.resumen')" :active="request()->routeIs('empresa.resumen')">
+                        Resumen Empresa
+                    </x-nav-link>
 
-                        <x-nav-link :href="route('fichajes.create')" :active="request()->routeIs('fichajes.create')">
-                            Mi Fichaje
-                        </x-nav-link>
+                    <x-nav-link :href="route('encargado.empleados')" :active="request()->routeIs('encargado.empleados')">
+                        Empleados
+                    </x-nav-link>
 
-                        <x-nav-link :href="route('fichaje.resumen')" :active="request()->routeIs('fichaje.resumen')">
-                            Mi Resumen
-                        </x-nav-link>
+                    <x-nav-link :href="route('fichajes.create')" :active="request()->routeIs('fichajes.create')">
+                        Mi Fichaje
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('fichaje.resumen')" :active="request()->routeIs('fichaje.resumen')">
+                        Mi Resumen
+                    </x-nav-link>
 
                     @endif
 
@@ -63,13 +67,13 @@
                     {{-- EMPLEADO --}}
                     @if(Auth::user()->rol_id === 3)
 
-                        <x-nav-link :href="route('fichajes.create')" :active="request()->routeIs('fichajes.create')">
-                            Fichar
-                        </x-nav-link>
+                    <x-nav-link :href="route('fichajes.create')" :active="request()->routeIs('fichajes.create')">
+                        Fichar
+                    </x-nav-link>
 
-                        <x-nav-link :href="route('fichaje.resumen')" :active="request()->routeIs('fichaje.resumen')">
-                            Mi Resumen
-                        </x-nav-link>
+                    <x-nav-link :href="route('fichaje.resumen')" :active="request()->routeIs('fichaje.resumen')">
+                        Mi Resumen
+                    </x-nav-link>
 
                     @endif
 
@@ -86,16 +90,29 @@
             <div class="hidden sm:flex sm:items-center">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                        <button class="inline-flex items-center gap-2 px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+
+                            {{-- AVATAR --}}
+                            <img
+                                src="{{ Auth::user()->avatar 
+                    ? asset('storage/' . Auth::user()->avatar) 
+                    : asset('images/avatar.png') }}"
+                                class="w-8 h-8 rounded-full object-cover border"
+                                alt="Avatar">
+
+                            {{-- NOMBRE --}}
                             <span>{{ Auth::user()->name }}</span>
-                            <svg class="ml-1 h-4 w-4" fill="currentColor">
+
+                            {{-- FLECHA --}}
+                            <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
-                                      d="M5.293 7.293a1 1 0 011.414 0L10 
-                                         10.586l3.293-3.293a1 1 0 111.414 
-                                         1.414l-4 4a1 1 0 01-1.414 
-                                         0l-4-4a1 1 0 010-1.414z"
-                                      clip-rule="evenodd" />
+                                    d="M5.293 7.293a1 1 0 011.414 0L10 
+                     10.586l3.293-3.293a1 1 0 111.414 
+                     1.414l-4 4a1 1 0 01-1.414 
+                     0l-4-4a1 1 0 010-1.414z"
+                                    clip-rule="evenodd" />
                             </svg>
+
                         </button>
                     </x-slot>
 
@@ -142,45 +159,49 @@
 
             {{-- ADMIN --}}
             @if(Auth::user()->rol_id === 1)
-                <x-responsive-nav-link :href="route('empresa.index')">Empresas</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('usuarios.index')">Usuarios</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('auditoria.index')">Auditoría</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('empresa.index')">Empresas</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('usuarios.index')">Usuarios</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('auditoria.index')">Auditoría</x-responsive-nav-link>
             @endif
 
             {{-- ENCARGADO --}}
             @if(Auth::user()->rol_id === 2)
 
-                <x-responsive-nav-link :href="route('empresa.estado')">
-                    Estado Empresa
-                </x-responsive-nav-link>
+            <x-nav-link :href="route('auditoria.index')" :active="request()->routeIs('auditoria.*')">
+                Auditoría
+            </x-nav-link>
 
-                <x-responsive-nav-link :href="route('empresa.resumen')">
-                    Resumen Empresa
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('empresa.estado')">
+                Estado Empresa
+            </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="route('encargado.empleados')">
-                    Empleados
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('empresa.resumen')">
+                Resumen Empresa
+            </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="route('fichajes.create')">
-                    Mi Fichaje
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('encargado.empleados')">
+                Empleados
+            </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="route('fichaje.resumen')">
-                    Mi Resumen
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('fichajes.create')">
+                Mi Fichaje
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('fichaje.resumen')">
+                Mi Resumen
+            </x-responsive-nav-link>
 
             @endif
 
             {{-- EMPLEADO --}}
             @if(Auth::user()->rol_id === 3)
-                <x-responsive-nav-link :href="route('fichajes.create')">
-                    Fichar
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('fichajes.create')">
+                Fichar
+            </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="route('fichaje.resumen')">
-                    Mi Resumen
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('fichaje.resumen')">
+                Mi Resumen
+            </x-responsive-nav-link>
             @endif
 
             {{-- Dashboard para todos --}}

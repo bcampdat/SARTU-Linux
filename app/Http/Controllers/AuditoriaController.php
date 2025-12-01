@@ -7,68 +7,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\PDF;
 
-/**
- * @OA\Tag(
- *     name="Auditoría",
- *     description="Gestión de registros de auditoría del sistema"
- * )
- */
+//composer require barryvdh/laravel-dompdf
+
+
 class AuditoriaController extends Controller
-{   
-    /**
-     * @OA\Get(
-     *     path="/api/auditoria",
-     *     operationId="getAuditoria",
-     *     tags={"Auditoría"},
-     *     summary="Listar registros de auditoría",
-     *     description="Obtiene un listado paginado de registros de auditoría con filtros opcionales",
-     *     @OA\Parameter(
-     *         name="from",
-     *         in="query",
-     *         description="Fecha inicio (YYYY-MM-DD)",
-     *         required=false,
-     *         @OA\Schema(type="string", format="date")
-     *     ),
-     *     @OA\Parameter(
-     *         name="to",
-     *         in="query",
-     *         description="Fecha fin (YYYY-MM-DD)",
-     *         required=false,
-     *         @OA\Schema(type="string", format="date")
-     *     ),
-     *     @OA\Parameter(
-     *         name="accion",
-     *         in="query",
-     *         description="Filtrar por tipo de acción",
-     *         required=false,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="usuario_id",
-     *         in="query",
-     *         description="ID del usuario",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Listado de registros de auditoría",
-     *         @OA\JsonContent(type="object")
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Acceso denegado - rol insuficiente"
-     *     ),
-     *     security={{"sanctum":{}}}
-     * )
-     */
+{
     public function index(Request $request)
     {
         $user = Auth::user();
 
-        $query = Auditoria::with('usuario');
+        $query = Auditoria::with(['usuario.rol', 'usuario.empresa']);
 
-        // Filtros
+        // === FILTROS BASE ===
         if ($request->filled('from')) {
             $query->whereDate('fecha_creacion', '>=', $request->from);
         }
@@ -78,17 +28,23 @@ class AuditoriaController extends Controller
         }
 
         if ($request->filled('accion')) {
-            $query->where('accion', $request->accion);
+            $query->where('accion', 'like', '%' . $request->accion . '%');
         }
 
         if ($request->filled('usuario_id')) {
             $query->where('user_id', $request->usuario_id);
         }
 
-        // Visibilidad por rol (SEGURIDAD)
+        // === FILTRO POR EMPRESA + SEGURIDAD ===
         if ($user->rol->nombre === 'admin_sistema') {
-            
+
+            if ($request->filled('empresa_id')) {
+                $query->whereHas('usuario', function ($q) use ($request) {
+                    $q->where('empresa_id', $request->empresa_id);
+                });
+            }
         } elseif ($user->rol->nombre === 'encargado') {
+
             $query->whereHas('usuario', function ($q) use ($user) {
                 $q->where('empresa_id', $user->empresa_id);
             });
@@ -98,72 +54,39 @@ class AuditoriaController extends Controller
 
         $logs = $query->orderBy('fecha_creacion', 'desc')->paginate(50);
 
-        // USUARIOS PARA EL FILTRO (SEGUROS)
+        // === USUARIOS PARA FILTRO DEPENDIENTES DE EMPRESA ===
         if ($user->rol->nombre === 'admin_sistema') {
-            $usuariosFiltro = \App\Models\Usuario::orderBy('email')
-                ->get(['id', 'email']);
+
+            $empresas = \App\Models\Empresa::orderBy('nombre')->get();
+
+            if ($request->filled('empresa_id')) {
+                $usuariosFiltro = \App\Models\Usuario::where('empresa_id', $request->empresa_id)
+                    ->orderBy('email')
+                    ->get(['id', 'email']);
+            } else {
+                $usuariosFiltro = \App\Models\Usuario::orderBy('email')
+                    ->get(['id', 'email']);
+            }
         } else {
+
             $usuariosFiltro = \App\Models\Usuario::where('empresa_id', $user->empresa_id)
                 ->orderBy('email')
                 ->get(['id', 'email']);
+
+            $empresas = collect();
         }
 
-        return view('auditoria.index', compact('logs', 'usuariosFiltro'));
+        return view('auditoria.index', compact(
+            'logs',
+            'usuariosFiltro',
+            'empresas'
+        ));
     }
-
-    /**
-     * @OA\Get(
-     *     path="/api/auditoria",
-     *     operationId="getAuditoria",
-     *     tags={"Auditoría"},
-     *     summary="Listar registros de auditoría",
-     *     description="Obtiene un listado paginado de registros de auditoría con filtros opcionales",
-     *     @OA\Parameter(
-     *         name="from",
-     *         in="query",
-     *         description="Fecha inicio (YYYY-MM-DD)",
-     *         required=false,
-     *         @OA\Schema(type="string", format="date")
-     *     ),
-     *     @OA\Parameter(
-     *         name="to",
-     *         in="query",
-     *         description="Fecha fin (YYYY-MM-DD)",
-     *         required=false,
-     *         @OA\Schema(type="string", format="date")
-     *     ),
-     *     @OA\Parameter(
-     *         name="accion",
-     *         in="query",
-     *         description="Filtrar por tipo de acción",
-     *         required=false,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Parameter(
-     *         name="usuario_id",
-     *         in="query",
-     *         description="ID del usuario",
-     *         required=false,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Listado de registros de auditoría",
-     *         @OA\JsonContent(type="object")
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Acceso denegado - rol insuficiente"
-     *     ),
-     *     security={{"sanctum":{}}}
-     * )
-     */
-    
     public function exportPdf(Request $request)
     {
         $user = Auth::user();
 
-        $query = Auditoria::with('usuario');
+        $query = Auditoria::with(['usuario.rol', 'usuario.empresa']);
 
         if ($request->filled('from')) {
             $query->whereDate('fecha_creacion', '>=', $request->from);
@@ -174,7 +97,7 @@ class AuditoriaController extends Controller
         }
 
         if ($request->filled('accion')) {
-            $query->where('accion', $request->accion);
+            $query->where('accion', 'like', '%' . $request->accion . '%');
         }
 
         if ($request->filled('usuario_id')) {
@@ -183,7 +106,13 @@ class AuditoriaController extends Controller
 
         if ($user->rol->nombre === 'admin_sistema') {
 
+            if ($request->filled('empresa_id')) {
+                $query->whereHas('usuario', function ($q) use ($request) {
+                    $q->where('empresa_id', $request->empresa_id);
+                });
+            }
         } elseif ($user->rol->nombre === 'encargado') {
+
             $query->whereHas('usuario', function ($q) use ($user) {
                 $q->where('empresa_id', $user->empresa_id);
             });
@@ -196,12 +125,13 @@ class AuditoriaController extends Controller
         $data = [
             'logs'         => $logs,
             'generadoPor'  => $user,
-            'filtros'      => [
-                'from'       => $request->from,
-                'to'         => $request->to,
-                'usuario_id' => $request->usuario_id,
-                'accion'     => $request->accion,
-            ],
+            'filtros'      => $request->only([
+                'from',
+                'to',
+                'usuario_id',
+                'accion',
+                'empresa_id'
+            ]),
             'fechaEmision' => now(),
         ];
 
@@ -209,9 +139,8 @@ class AuditoriaController extends Controller
         $pdf->loadView('auditoria.pdf', $data);
         $pdf->setPaper('a4', 'portrait');
 
-        $fileName = 'auditoria_' . now()->format('Ymd_His') . '.pdf';
-
-        return $pdf->download($fileName);
+        return $pdf->download(
+            'auditoria_' . now()->format('Ymd_His') . '.pdf'
+        );
     }
 }
-

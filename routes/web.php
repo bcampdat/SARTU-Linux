@@ -28,6 +28,7 @@ require_once __DIR__ . '/auth.php';
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 
@@ -40,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/password/force-change', [CambioPassController::class, 'update'])
         ->name('password.force-change.update');
 });
+
 
 // ADMIN SISTEMA
 
@@ -60,6 +62,14 @@ Route::middleware(['auth', 'rol:admin_sistema'])->group(function () {
         ->name('auditoria.index');
 });
 
+Route::patch('/usuarios/{usuario}/bloquear', [UsuarioController::class, 'bloquear'])
+    ->name('usuarios.bloquear')
+    ->middleware('auth');
+
+Route::patch('/usuarios/{usuario}/desbloquear', [UsuarioController::class, 'desbloquear'])
+    ->name('usuarios.desbloquear');
+
+
 // EMPLEADO + ENCARGADO
 
 Route::middleware(['auth', 'rol:empleado,encargado'])->group(function () {
@@ -75,6 +85,7 @@ Route::middleware(['auth', 'rol:empleado,encargado'])->group(function () {
     Route::get('mi-resumen', [ResumenDiarioController::class, 'index'])
         ->name('fichaje.resumen');
 });
+
 
 // ENCARGADO
 
@@ -93,7 +104,8 @@ Route::middleware(['auth', 'rol:encargado'])->group(function () {
         ->name('empleados.resumen');
 });
 
-// ENCARGADO + ADMIN SISTEMA
+
+// ENCARGADO + ADMIN → NUEVO SISTEMA EMPRESA
 
 Route::middleware(['auth', 'rol:admin_sistema,encargado'])->group(function () {
 
@@ -105,9 +117,6 @@ Route::middleware(['auth', 'rol:admin_sistema,encargado'])->group(function () {
     Route::get('empresa/resumen', [FichajeController::class, 'resumenEmpresa'])
         ->name('empresa.resumen');
 });
-
-
-// AUDITORIA
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/auditoria', [AuditoriaController::class, 'index'])

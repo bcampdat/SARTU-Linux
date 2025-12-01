@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers;
 
@@ -10,31 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Services\AuditoriaService;
 
-/**
- * @OA\Tag(
- *     name="Usuarios",
- *     description="Gestión de usuarios del sistema"
- * )
- */
-
 class UsuarioController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/api/usuarios",
-     *     operationId="getUsuarios",
-     *     tags={"Usuarios"},
-     *     summary="Listar usuarios",
-     *     description="Lista usuarios según el rol del solicitante: admin ve todos, encargado su empresa, empleado solo a sí mismo",
-     *     @OA\Response(
-     *         response=200,
-     *         description="Listado de usuarios",
-     *         @OA\JsonContent(type="array", @OA\Items(type="object"))
-     *     ),
-     *     security={{"sanctum":{}}}
-     * )
-     */
-
     public function index()
     {
         $usuario = Auth::user();
@@ -44,7 +21,7 @@ class UsuarioController extends Controller
             $usuarios = Usuario::with(['empresa', 'rol'])->get();
         }
         // ENCARGADO → solo su empresa
-        elseif ($usuario->rol->nombre === 'encargado') {
+        else if ($usuario->rol->nombre === 'encargado') {
             $usuarios = Usuario::with(['empresa', 'rol'])
                 ->where('empresa_id', $usuario->empresa_id)
                 ->get();
@@ -63,18 +40,6 @@ class UsuarioController extends Controller
         return view('usuarios.index', compact('usuarios'));
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/usuarios/create",
-     *     operationId="createUsuarioForm",
-     *     tags={"Usuarios"},
-     *     summary="Formulario para crear usuario",
-     *     description="Retorna vista con formulario para crear un usuario (admin o encargado)",
-     *     @OA\Response(response=200, description="Formulario mostrado"),
-     *     security={{"sanctum":{}}}
-     * )
-     */
-
     public function create()
     {
         $usuario = Auth::user();
@@ -91,28 +56,7 @@ class UsuarioController extends Controller
 
         return view('usuarios.create', compact('empresas', 'roles'));
     }
-    /**
-     * @OA\Post(
-     *     path="/api/usuarios",
-     *     operationId="storeUsuario",
-     *     tags={"Usuarios"},
-     *     summary="Crear usuario",
-     *     description="Crea un nuevo usuario. El encargado solo puede crear empleados en su empresa.",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name","email","rol_id","empresa_id"},
-     *             @OA\Property(property="name", type="string", example="Juan Pérez"),
-     *             @OA\Property(property="email", type="string", format="email", example="juan@example.com"),
-     *             @OA\Property(property="rol_id", type="integer", example=3),
-     *             @OA\Property(property="empresa_id", type="integer", example=1)
-     *         )
-     *     ),
-     *     @OA\Response(response=302, description="Redirección tras creación"),
-     *     @OA\Response(response=422, description="Validación fallida"),
-     *     security={{"sanctum":{}}}
-     * )
-     */
+
     public function store(Request $request)
     {
         $usuario = Auth::user();
@@ -174,25 +118,7 @@ class UsuarioController extends Controller
             ->route('usuarios.index')
             ->with('success', "Usuario creado. Contraseña temporal: $tempPassword");
     }
-    /**
-     * @OA\Get(
-     *     path="/api/usuarios/{usuario}",
-     *     operationId="getUsuario",
-     *     tags={"Usuarios"},
-     *     summary="Obtener usuario",
-     *     description="Retorna vista para editar un usuario",
-     *     @OA\Parameter(
-     *         name="usuario",
-     *         in="path",
-     *         description="ID del usuario",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(response=200, description="Usuario encontrado"),
-     *     @OA\Response(response=404, description="No encontrado"),
-     *     security={{"sanctum":{}}}
-     * )
-     */
+
     public function edit(Usuario $usuario)
     {
         $user = Auth::user();
@@ -206,36 +132,7 @@ class UsuarioController extends Controller
 
         return view('usuarios.edit', compact('usuario', 'empresas', 'roles'));
     }
-    /**
-     * @OA\Put(
-     *     path="/api/usuarios/{usuario}",
-     *     operationId="updateUsuario",
-     *     tags={"Usuarios"},
-     *     summary="Actualizar usuario",
-     *     description="Actualiza datos de un usuario. Encargado solo usuarios de su empresa.",
-     *     @OA\Parameter(
-     *         name="usuario",
-     *         in="path",
-     *         description="ID del usuario",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name","email","rol_id","empresa_id","activo"},
-     *             @OA\Property(property="name", type="string", example="Nombre actualizado"),
-     *             @OA\Property(property="email", type="string", format="email", example="nuevo@example.com"),
-     *             @OA\Property(property="rol_id", type="integer", example=2),
-     *             @OA\Property(property="empresa_id", type="integer", example=1),
-     *             @OA\Property(property="activo", type="boolean", example=true)
-     *         )
-     *     ),
-     *     @OA\Response(response=302, description="Redirección tras actualización"),
-     *     @OA\Response(response=422, description="Validación fallida"),
-     *     security={{"sanctum":{}}}
-     * )
-     */
+
     public function update(Request $request, Usuario $usuario)
     {
         $user = Auth::user();
@@ -244,15 +141,20 @@ class UsuarioController extends Controller
             abort(403);
         }
 
+        //  BLOQUEO TOTAL
+        if ($usuario->estado === 'bloqueado') {
+            return redirect()
+                ->route('usuarios.index')
+                ->with('error', 'Este usuario está bloqueado y no puede modificarse.');
+        }
+
         $request->validate([
             'name'        => 'required|string|max:255',
             'email'       => 'required|email|unique:users,email,' . $usuario->id,
             'rol_id'      => 'required|exists:roles,id_rol',
             'empresa_id'  => 'required|exists:empresas,id_empresa',
-            'activo'      => 'required|boolean'
         ]);
 
-        // AUDITORÍA: antes de actualizar
         $antes = $usuario->toArray();
 
         $usuario->update([
@@ -260,10 +162,8 @@ class UsuarioController extends Controller
             'email'       => $request->email,
             'rol_id'      => $request->rol_id,
             'empresa_id'  => $request->empresa_id,
-            'activo'      => $request->activo,
         ]);
 
-        // AUDITORÍA: después de actualizar
         AuditoriaService::log(
             'editar_usuario',
             'Usuario',
@@ -276,25 +176,82 @@ class UsuarioController extends Controller
         return redirect()->route('usuarios.index')
             ->with('success', 'Usuario actualizado correctamente.');
     }
-    /**
-     * @OA\Delete(
-     *     path="/api/usuarios/{usuario}",
-     *     operationId="deleteUsuario",
-     *     tags={"Usuarios"},
-     *     summary="Eliminar usuario",
-     *     description="Elimina un usuario (encargado solo puede eliminar usuarios de su empresa)",
-     *     @OA\Parameter(
-     *         name="usuario",
-     *         in="path",
-     *         description="ID del usuario a eliminar",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(response=302, description="Redirección tras eliminación"),
-     *     @OA\Response(response=403, description="Permiso denegado"),
-     *     security={{"sanctum":{}}}
-     * )
-     */
+
+    public function bloquear(Usuario $usuario)
+    {
+        $user = Auth::user();
+
+        // Solo el admin_sistema puede bloquear
+        if ($user->rol->nombre !== 'admin_sistema') {
+            abort(403);
+        }
+
+        // Guardamos estado anterior para auditoría
+        $antes = $usuario->toArray();
+
+        // Cambiamos a bloqueado
+        $usuario->estado = 'bloqueado';
+        $usuario->activo = 0; // por coherencia: bloqueado = inactivo
+        $usuario->save();
+
+        // AUDITORÍA DEL BLOQUEO
+        AuditoriaService::log(
+            'bloquear_usuario',
+            'Usuario',
+            $usuario->id,
+            $antes,
+            $usuario->toArray(),
+            'Usuario bloqueado por admin_sistema'
+        );
+
+        return back()->with('success', 'Usuario bloqueado correctamente.');
+    }
+
+    public function desbloquear(Usuario $usuario)
+    {
+        $user = Auth::user();
+
+        // Solo admin_sistema puede desbloquear
+        if ($user->rol->nombre !== 'admin_sistema') {
+            abort(403);
+        }
+
+        // Solo se puede desbloquear si está bloqueado
+        if ($usuario->estado !== 'bloqueado') {
+            return back()->with('error', 'El usuario no está bloqueado.');
+        }
+
+        $antes = $usuario->toArray();
+
+        // Generamos Nueva contraseña temporal
+        $tempPassword = substr(
+            str_shuffle('abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'),
+            0,
+            10
+        );
+
+        // Reset completo del usuario (como nuevo)
+        $usuario->estado = 'pendiente';
+        $usuario->activo = 0;
+        $usuario->password = Hash::make($tempPassword);
+        $usuario->save();
+
+        // Auditoría
+        AuditoriaService::log(
+            'desbloquear_usuario',
+            'Usuario',
+            $usuario->id,
+            $antes,
+            $usuario->toArray(),
+            'Usuario desbloqueado y reiniciado con contraseña temporal'
+        );
+
+        return back()->with(
+            'success',
+            "Usuario desbloqueado correctamente. Nueva contraseña temporal: $tempPassword"
+        );
+    }
+
     public function destroy(Usuario $usuario)
     {
         $user = Auth::user();
@@ -318,16 +275,37 @@ class UsuarioController extends Controller
         return back()->with('success', 'Usuario eliminado.');
     }
 
-    public function empleadosEmpresa()
+    public function empleadosEmpresa(Request $request)
     {
         $user = Auth::user();
 
-        // Encargado ve solo los empleados de su empresa
-        $empleados = Usuario::where('empresa_id', $user->empresa_id)
-            ->with('rol')
-            ->get();
+        $query = Usuario::where('empresa_id', $user->empresa_id)
+            ->with('rol');
+
+        //  FILTRO NOMBRE
+        if ($request->filled('nombre')) {
+            $query->where('name', 'like', '%' . $request->nombre . '%');
+        }
+
+        //  FILTRO EMAIL
+        if ($request->filled('email')) {
+            $query->where('email', 'like', '%' . $request->email . '%');
+        }
+
+        // FILTRO ROL
+        if ($request->filled('rol')) {
+            $query->whereHas('rol', function ($q) use ($request) {
+                $q->where('nombre', $request->rol);
+            });
+        }
+
+        // FILTRO ESTADO REAL
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        $empleados = $query->paginate(10)->withQueryString();
 
         return view('usuarios.encargado_index', compact('empleados'));
     }
 }
-

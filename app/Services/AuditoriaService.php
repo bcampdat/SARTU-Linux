@@ -5,9 +5,7 @@ namespace App\Services;
 use App\Models\Auditoria;
 use Illuminate\Support\Facades\Auth;
 
-/**
- * Servicio para manejar la auditoría de acciones del sistema.
- */
+//AuditoriaService::log('login_correcto', 'Usuario', $user->id, null, null, 'Login desde web');  asi  se inyecta
 
 class AuditoriaService
 {

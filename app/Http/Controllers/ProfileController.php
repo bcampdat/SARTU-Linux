@@ -8,11 +8,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use App\Services\AuditoriaService;
 
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Mostrar formulario de perfil
      */
     public function edit(Request $request): View
     {
@@ -22,23 +26,75 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile information.
+     * Actualizar perfil
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        //  Bloqueados y pendientes NO pueden modificar perfil
+        if (in_array($user->estado, ['bloqueado', 'pendiente'])) {
+            abort(403, 'Tu cuenta no puede modificarse en este estado.');
         }
 
-        $request->user()->save();
+        // Guardamos estado anterior para auditoría
+        $antes = $user->toArray();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        //  Validar avatar (solo aquí)
+        $request->validate([
+            'avatar' => 'nullable|image|mimes:png,jpg,jpeg,webp|max:2048',
+        ]);
+
+        //  Solo permitimos actualizar nombre (NO email aquí)
+        $datos = $request->validated();
+        unset($datos['email']); // Blindaje total
+
+        $user->fill($datos);
+
+        // Procesar avatar si existe
+        if ($request->hasFile('avatar')) {
+
+            // Borrar avatar anterior si existe
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            try {
+                $file = $request->file('avatar');
+
+                $manager = new ImageManager(new Driver());
+                $image   = $manager->read($file->getPathname());
+                $image->scale(width: 300);
+
+                $avatarBinary = $image->toJpeg(85);
+                $avatarName   = 'avatars/avatar_' . uniqid() . '.jpg';
+
+                Storage::disk('public')->put($avatarName, $avatarBinary);
+
+                $user->avatar = $avatarName;
+            } catch (\Throwable $e) {
+                return back()->with('error', 'Error al procesar la imagen de perfil.');
+            }
+        }
+
+        $user->save();
+
+        //  Auditoría 
+        AuditoriaService::log(
+            'perfil_actualizado',
+            'Usuario',
+            $user->id,
+            $antes,
+            $user->toArray(),
+            'Actualización de perfil'
+        );
+
+        return Redirect::route('dashboard')
+            ->with('status', 'profile-updated');
     }
 
     /**
-     * Delete the user's account.
+     * Eliminar cuenta
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -48,13 +104,31 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        Auth::logout();
+        // Guardar estado anterior para auditoría
+        $antes = $user->toArray();
 
-        $user->delete();
+        //  BLOQUEO LÓGICO (NO SE BORRA)
+        $user->estado = 'bloqueado';
+        $user->activo = 0;
+        $user->save();
+
+        // Auditoría
+        AuditoriaService::log(
+            'bloqueo_propio_usuario',
+            'Usuario',
+            $user->id,
+            $antes,
+            $user->toArray(),
+            'Usuario se ha bloqueado a sí mismo desde perfil'
+        );
+
+        // Logout forzado
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('/');
+        return Redirect::to('/')
+            ->with('status', 'account-blocked');
     }
 }

@@ -38,7 +38,22 @@
                 <tbody class="divide-y divide-sartu-gris-oscuro">
                     @foreach ($empresas as $empresa)
                     <tr class="hover:bg-gray-100">
-                        <td class="px-4 py-2">{{ $empresa->nombre }}</td>
+                        <td class="px-4 py-2">
+                            <div class="flex items-center gap-3">
+                                @if($empresa->logo_thumb)
+                                <img src="{{ asset('storage/' . $empresa->logo_thumb) }}"
+                                    class="h-8 w-8 rounded object-cover shadow">
+                                @else
+                                <div class="h-8 w-8 rounded bg-gray-300 flex items-center justify-center text-xs text-gray-600">
+                                    —
+                                </div>
+                                @endif
+
+                                <span class="font-medium">
+                                    {{ $empresa->nombre }}
+                                </span>
+                            </div>
+                        </td>
                         <td class="px-4 py-2 text-center">{{ $empresa->limite_usuarios }}</td>
                         <td class="px-4 py-2 text-center">{{ $empresa->jornada_diaria_minutos }}</td>
                         <td class="px-4 py-2 text-center">{{ $empresa->max_pausa_no_contabilizada }}</td>

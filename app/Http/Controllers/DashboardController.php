@@ -83,8 +83,18 @@ class DashboardController extends Controller
             $q->where('empresa_id', $user->empresa_id);
         });
 
-        $totalEntradasHoy = $fichajesEmpresaQuery->clone()->where('tipo', 'entrada')->count();
-        $totalSalidasHoy  = $fichajesEmpresaQuery->clone()->where('tipo', 'salida')->count();
+        $totalEntradasHoy = $fichajesEmpresaQuery
+            ->clone()
+            ->whereDate('fecha_hora', $hoy)
+            ->where('tipo', 'entrada')
+            ->count();
+
+        $totalSalidasHoy = $fichajesEmpresaQuery
+            ->clone()
+            ->whereDate('fecha_hora', $hoy)
+            ->where('tipo', 'salida')
+            ->count();
+
 
         $resumenEmpresaHoy = ResumenDiario::whereDate('fecha', $hoy)
             ->whereHas('usuario', function ($q) use ($user) {
@@ -92,12 +102,15 @@ class DashboardController extends Controller
             })
             ->get();
 
-        $ultimosFichajesEmpresa = $fichajesEmpresaQuery
-            ->clone()
+        $ultimosFichajesEmpresa = Fichaje::whereDate('fecha_hora', $hoy)
+            ->whereHas('usuario', function ($q) use ($user) {
+                $q->where('empresa_id', $user->empresa_id);
+            })
             ->with('usuario')
-            ->latest()
-            ->take(8)
-            ->get();
+            ->latest('fecha_hora')
+            ->get()
+            ->groupBy('user_id')
+            ->take(5);
 
 
         $miResumen = ResumenDiario::where('user_id', $user->id)
